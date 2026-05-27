@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0084FF"/>
+      <stop offset="1" stop-color="#1A56DB"/>
+    </linearGradient>
+    <linearGradient id="paneBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F9FAFB"/>
+      <stop offset="1" stop-color="#F3F4F6"/>
+    </linearGradient>
+    <filter id="soft" x="-5%" y="-5%" width="110%" height="110%">
+      <feGaussianBlur stdDeviation="14" result="b"/>
+      <feOffset dy="8" in="b" result="o"/>
+      <feComponentTransfer in="o" result="oo"><feFuncA type="linear" slope="0.18"/></feComponentTransfer>
+      <feMerge><feMergeNode in="oo"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <style>
+      .h { font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+      .mono { font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace; }
+    </style>
+  </defs>
+
+  <!-- canvas -->
+  <rect width="1920" height="1080" fill="#FFFFFF"/>
+
+  <!-- top eyebrow -->
+  <g class="h" text-anchor="middle">
+    <text x="960" y="92" font-size="22" font-weight="600" fill="#0084FF" letter-spacing="3">CLAUDE CODE  ·  NOTION MCP</text>
+    <text x="960" y="148" font-size="46" font-weight="700" fill="#111928">Raw search result vs. a written-back Notion page</text>
+    <text x="960" y="186" font-size="20" fill="#6B7280">Three tool calls. One round-trip. A real artifact in the workspace.</text>
+  </g>
+
+  <!-- LEFT pane: notion-search raw result -->
+  <g filter="url(#soft)">
+    <rect x="90" y="240" width="820" height="720" rx="20" fill="url(#paneBg)" stroke="#E5E7EB"/>
+  </g>
+  <g class="h">
+    <text x="120" y="290" font-size="16" font-weight="600" fill="#6B7280" letter-spacing="2">INPUT</text>
+    <text x="120" y="328" font-size="28" font-weight="700" fill="#111928">notion-search</text>
+    <text x="120" y="358" font-size="16" fill="#6B7280">workspace query, returns matching pages</text>
+  </g>
+
+  <!-- terminal-style call line -->
+  <rect x="120" y="386" width="760" height="76" rx="10" fill="#0F172A"/>
+  <g class="mono">
+    <text x="142" y="416" font-size="16" fill="#9CA3AF">⏺ notion - notion-search(</text>
+    <text x="142" y="442" font-size="16" fill="#9CA3AF">    query: "roadmap OR Q3 planning"</text>
+  </g>
+
+  <!-- raw JSON-ish result -->
+  <rect x="120" y="482" width="760" height="446" rx="10" fill="#FFFFFF" stroke="#E5E7EB"/>
+  <g class="mono" font-size="15" fill="#374151">
+    <text x="142" y="514">⎿  results: [</text>
+    <text x="162" y="540">  {</text>
+    <text x="182" y="566">    id: "1a4f...92c",</text>
+    <text x="182" y="592">    title: "Q3 Roadmap",</text>
+    <text x="182" y="618">    last_edited_by: "Sam"</text>
+    <text x="162" y="644">  },</text>
+    <text x="162" y="670">  {</text>
+    <text x="182" y="696">    id: "82b1...0e7",</text>
+    <text x="182" y="722">    title: "Planning notes",</text>
+    <text x="182" y="748">    last_edited_by: "Priya"</text>
+    <text x="162" y="774">  },</text>
+    <text x="162" y="800">  {</text>
+    <text x="182" y="826">    id: "9c30...4d2",</text>
+    <text x="182" y="852">    title: "Sprint Sync"</text>
+    <text x="162" y="878">  }</text>
+    <text x="142" y="904">]</text>
+  </g>
+
+  <!-- arrow gutter (between panes) -->
+  <g>
+    <rect x="932" y="586" width="56" height="56" rx="28" fill="url(#accent)"/>
+    <path d="M 950 614 L 970 614 M 962 606 L 970 614 L 962 622" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </g>
+
+  <!-- RIGHT pane: written-back Notion page -->
+  <g filter="url(#soft)">
+    <rect x="1010" y="240" width="820" height="720" rx="20" fill="#FFFFFF" stroke="#E5E7EB"/>
+  </g>
+  <g class="h">
+    <text x="1040" y="290" font-size="16" font-weight="600" fill="#0084FF" letter-spacing="2">OUTPUT</text>
+    <text x="1040" y="328" font-size="28" font-weight="700" fill="#111928">notion-create-pages</text>
+    <text x="1040" y="358" font-size="16" fill="#6B7280">Markdown summary lands in Notion as a real page</text>
+  </g>
+
+  <!-- mock notion page card -->
+  <rect x="1040" y="386" width="760" height="542" rx="14" fill="#FFFFFF" stroke="#E5E7EB"/>
+
+  <!-- page header -->
+  <g class="h">
+    <text x="1064" y="430" font-size="28" font-weight="700" fill="#111928">Sprint Sync Notes — May 21</text>
+    <text x="1064" y="458" font-size="14" fill="#9CA3AF">Created by Claude Code  ·  3 blocks  ·  parent: Engineering</text>
+  </g>
+
+  <!-- callout block -->
+  <rect x="1064" y="482" width="712" height="62" rx="10" fill="#EEF4FF" stroke="#DBE7FF"/>
+  <text x="1086" y="520" class="h" font-size="18" fill="#1A56DB">↪  Source: Q3 Roadmap  ·  Planning notes  ·  Sprint Sync</text>
+
+  <!-- bullets -->
+  <g class="h" font-size="18" fill="#111928">
+    <text x="1064" y="588">Summary</text>
+  </g>
+  <g class="h" font-size="16" fill="#374151">
+    <text x="1080" y="618">•  Three planning surfaces converge on the Q3 launch milestone</text>
+    <text x="1080" y="646">•  Owners are split across Sam and Priya; no single DRI named yet</text>
+    <text x="1080" y="674">•  Decision deadline lands inside the merge freeze window</text>
+  </g>
+
+  <!-- checklist -->
+  <g class="h" font-size="18" fill="#111928">
+    <text x="1064" y="722">Follow-ups</text>
+  </g>
+  <g class="h" font-size="16" fill="#374151">
+    <rect x="1080" y="738" width="14" height="14" rx="3" fill="#FFFFFF" stroke="#9CA3AF"/>
+    <text x="1106" y="752">Nominate a Q3 launch DRI by Friday</text>
+    <rect x="1080" y="766" width="14" height="14" rx="3" fill="#FFFFFF" stroke="#9CA3AF"/>
+    <text x="1106" y="780">Move the decision review out of the freeze window</text>
+    <rect x="1080" y="794" width="14" height="14" rx="3" fill="#FFFFFF" stroke="#9CA3AF"/>
+    <text x="1106" y="808">Cross-link to the Sprint Sync database row</text>
+  </g>
+
+  <!-- footer pill -->
+  <g class="h">
+    <rect x="1064" y="858" width="280" height="34" rx="17" fill="#F3F4F6"/>
+    <text x="1080" y="881" font-size="14" fill="#374151">notion.so/engineering/sprint-sync-may21</text>
+  </g>
+
+  <!-- bottom caption -->
+  <g class="h" text-anchor="middle">
+    <text x="960" y="1018" font-size="20" fill="#374151">Same data. Three tool calls. From terminal JSON to a real Notion page your team can edit.</text>
+  </g>
+</svg>

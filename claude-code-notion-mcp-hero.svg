@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B1220"/>
+      <stop offset="1" stop-color="#111928"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0084FF"/>
+      <stop offset="1" stop-color="#1A56DB"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#0084FF" stop-opacity="0.42"/>
+      <stop offset="1" stop-color="#0084FF" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="20" result="b"/>
+      <feOffset dy="14" in="b" result="o"/>
+      <feComponentTransfer in="o" result="oo"><feFuncA type="linear" slope="0.35"/></feComponentTransfer>
+      <feMerge><feMergeNode in="oo"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <style>
+      .h { font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+      .mono { font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace; }
+    </style>
+  </defs>
+
+  <!-- canvas + atmosphere -->
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+  <ellipse cx="320" cy="240" rx="520" ry="380" fill="url(#glow)"/>
+  <ellipse cx="1620" cy="880" rx="560" ry="420" fill="url(#glow)" opacity="0.7"/>
+
+  <!-- subtle grid -->
+  <g stroke="#1F2937" stroke-width="1" opacity="0.4">
+    <line x1="0" y1="270" x2="1920" y2="270"/>
+    <line x1="0" y1="540" x2="1920" y2="540"/>
+    <line x1="0" y1="810" x2="1920" y2="810"/>
+    <line x1="480" y1="0" x2="480" y2="1080"/>
+    <line x1="960" y1="0" x2="960" y2="1080"/>
+    <line x1="1440" y1="0" x2="1440" y2="1080"/>
+  </g>
+
+  <!-- eyebrow -->
+  <g class="h">
+    <rect x="120" y="160" width="240" height="44" rx="22" fill="rgba(0,132,255,0.15)" stroke="#0084FF" stroke-opacity="0.5"/>
+    <text x="240" y="189" text-anchor="middle" font-size="16" font-weight="600" fill="#9CD3FF" letter-spacing="3">CLAUDE CODE  +  MCP</text>
+  </g>
+
+  <!-- headline -->
+  <g class="h" fill="#FFFFFF">
+    <text x="120" y="304" font-size="92" font-weight="800" letter-spacing="-2">How to use Claude Code</text>
+    <text x="120" y="404" font-size="92" font-weight="800" letter-spacing="-2">with the <tspan fill="url(#accent)">Notion MCP</tspan></text>
+  </g>
+
+  <!-- subtitle -->
+  <g class="h">
+    <text x="124" y="466" font-size="26" fill="#9CA3AF">Search a workspace, read a page, write a new one — in three tool calls.</text>
+  </g>
+
+  <!-- left card: prompt -->
+  <g filter="url(#shadow)">
+    <rect x="120" y="544" width="740" height="396" rx="20" fill="#0F172A" stroke="#1F2937"/>
+  </g>
+  <g class="h">
+    <rect x="144" y="568" width="120" height="28" rx="14" fill="rgba(0,132,255,0.15)"/>
+    <text x="204" y="587" text-anchor="middle" font-size="13" font-weight="600" fill="#9CD3FF" letter-spacing="2">PROMPT</text>
+    <text x="144" y="640" font-size="22" font-weight="600" fill="#E5E7EB">You, in Claude Code:</text>
+  </g>
+  <g class="mono" font-size="18" fill="#D1D5DB">
+    <text x="144" y="688">Search my Notion workspace for pages</text>
+    <text x="144" y="716">about Q3 planning. Fetch the top result</text>
+    <text x="144" y="744">and write a new page called Sprint Sync</text>
+    <text x="144" y="772">Notes under the same parent — Markdown</text>
+    <text x="144" y="800">summary, a 3-item checklist, and a</text>
+    <text x="144" y="828">callout linking back to the source.</text>
+  </g>
+  <g class="h">
+    <text x="144" y="892" font-size="14" font-weight="600" fill="#0084FF" letter-spacing="2">▸  PASTE INTO CLAUDE CODE</text>
+  </g>
+
+  <!-- arrow between cards -->
+  <g>
+    <rect x="884" y="724" width="76" height="76" rx="38" fill="url(#accent)"/>
+    <path d="M 906 762 L 938 762 M 928 752 L 938 762 L 928 772" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </g>
+
+  <!-- right card: result -->
+  <g filter="url(#shadow)">
+    <rect x="984" y="544" width="816" height="396" rx="20" fill="#FFFFFF"/>
+  </g>
+  <g class="h">
+    <rect x="1008" y="568" width="124" height="28" rx="14" fill="#EEF4FF"/>
+    <text x="1070" y="587" text-anchor="middle" font-size="13" font-weight="600" fill="#1A56DB" letter-spacing="2">RESULT</text>
+    <text x="1008" y="640" font-size="22" font-weight="600" fill="#111928">In Notion, one minute later:</text>
+  </g>
+
+  <!-- mock notion page inside the right card -->
+  <rect x="1008" y="668" width="768" height="242" rx="14" fill="#F9FAFB" stroke="#E5E7EB"/>
+  <g class="h">
+    <text x="1032" y="708" font-size="22" font-weight="700" fill="#111928">Sprint Sync Notes — May 21</text>
+    <text x="1032" y="730" font-size="13" fill="#9CA3AF">Created by Claude Code  ·  parent: Engineering</text>
+  </g>
+  <rect x="1032" y="746" width="720" height="40" rx="8" fill="#EEF4FF" stroke="#DBE7FF"/>
+  <text x="1052" y="772" class="h" font-size="15" fill="#1A56DB">↪  Source: Q3 Roadmap</text>
+  <g class="h" font-size="15" fill="#374151">
+    <rect x="1032" y="804" width="12" height="12" rx="2" fill="#FFFFFF" stroke="#9CA3AF"/>
+    <text x="1054" y="816">Nominate a Q3 launch DRI by Friday</text>
+    <rect x="1032" y="828" width="12" height="12" rx="2" fill="#FFFFFF" stroke="#9CA3AF"/>
+    <text x="1054" y="840">Resolve the freeze-window decision review</text>
+    <rect x="1032" y="852" width="12" height="12" rx="2" fill="#FFFFFF" stroke="#9CA3AF"/>
+    <text x="1054" y="864">Cross-link to the Sprint Sync database</text>
+  </g>
+
+  <!-- footer band -->
+  <g class="h">
+    <text x="120" y="1010" font-size="18" fill="#6B7280">Hosted Notion MCP  ·  Streamable HTTP at mcp.notion.com/mcp  ·  18 tools  ·  OAuth, page-scoped</text>
+    <text x="1800" y="1010" text-anchor="end" font-size="18" font-weight="600" fill="#FFFFFF">flowhunt.io</text>
+  </g>
+</svg>
