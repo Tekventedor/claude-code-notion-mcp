@@ -4,6 +4,7 @@
 import { writeFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { CLAUDE_ICON } from './assets.mjs';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const FPS = 30;
@@ -19,7 +20,7 @@ const F = {
 const TOTAL_FRAMES = 1650;
 const TOTAL_SECONDS = TOTAL_FRAMES / FPS;
 
-const HELPERS = `var R=React.createElement;var cl=function(x){return Math.max(0,Math.min(1,x));};var ease=function(t){return 1-Math.pow(1-t,3);};var easeIn=function(t){return t*t*t;};var easeInOut=function(t){return t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;};var easeBack=function(t){var c1=1.70158;var c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2);};var lerp=function(a,b,t){return a+(b-a)*t;};var grad='linear-gradient(90deg,#0084FF,#1A56DB)';var INTER="Inter,system-ui,sans-serif";var MONO='"JetBrains Mono",ui-monospace,Menlo,monospace';`;
+const HELPERS = `var R=React.createElement;var cl=function(x){return Math.max(0,Math.min(1,x));};var ease=function(t){return 1-Math.pow(1-t,3);};var easeIn=function(t){return t*t*t;};var easeInOut=function(t){return t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;};var easeBack=function(t){var c1=1.70158;var c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2);};var lerp=function(a,b,t){return a+(b-a)*t;};var grad='linear-gradient(90deg,#0084FF,#1A56DB)';var INTER="Inter,system-ui,sans-serif";var MONO='"JetBrains Mono",ui-monospace,Menlo,monospace';var CLAUDE_ICON_URI='${CLAUDE_ICON}';function NotionMark(size,color){return R('svg',{width:size,height:size,viewBox:'0 0 100 100'},R('path',{d:'M16 18 L16 84 L26 84 L26 38 L72 84 L84 84 L84 18 L74 18 L74 64 L26 18 Z',fill:color||'#111928'}));}function BriefcaseIcon(size,color){return R('svg',{width:size,height:size,viewBox:'0 0 24 24',fill:'none'},R('rect',{x:3,y:7,width:18,height:13,rx:2,fill:color||'#A0522D'}),R('path',{d:'M8 7 V5 a2 2 0 0 1 2-2 h4 a2 2 0 0 1 2 2 V7',stroke:color||'#7C3E1A',strokeWidth:1.5,fill:'none'}),R('rect',{x:3,y:11,width:18,height:2,fill:'rgba(0,0,0,0.18)'}));}`;
 
 const FH_MARK_PATH = 'M36.369 175.282L24.2163 203.986C22.1071 208.969 23.073 214.948 27.1337 219.014C29.8048 221.688 33.3037 223.02 36.8027 223.02C40.3016 223.02 43.8006 221.688 46.4716 219.014L58.023 207.449L101.627 163.787C103.647 161.764 102.218 158.32 99.3599 158.32H74.5815C74.4336 158.32 74.2858 158.3 74.1281 158.3C48.0289 158.3 26.8578 136.8 27.3506 110.563C27.8335 84.9175 49.2905 64.6304 74.9067 64.6304H127.785C128.633 64.6304 129.451 64.295 130.052 63.6931L151.006 42.7153C153.027 40.6925 151.598 37.2488 148.739 37.2488H75.1531C34.0134 37.2488 -0.365082 70.9455 -0.000396729 112.131C0.236145 138.98 14.7839 162.454 36.3591 175.302L36.369 175.282ZM199.992 158.31C225.608 158.31 247.065 138.023 247.548 112.378C248.031 86.7331 226.87 64.6403 200.77 64.6403C200.613 64.6403 200.445 64.6206 200.287 64.6206H175.529C172.68 64.6206 171.251 61.167 173.262 59.1541L219.103 13.2615H219.093L228.121 4.20336C233.276 -0.957219 241.664 -1.50979 247.124 3.33504C251.707 7.39048 252.88 13.7154 250.662 18.945L238.51 47.639C260.105 60.4763 274.662 83.9505 274.909 110.799C275.273 151.985 240.895 185.692 199.755 185.692H126.159C123.31 185.692 121.881 182.238 123.892 180.225L144.846 159.248C145.447 158.646 146.266 158.31 147.113 158.31H200.002H199.992ZM186.617 87.1771C199.696 87.1771 210.301 97.7943 210.301 110.888C210.301 123.982 199.696 134.599 186.617 134.599C173.538 134.599 162.932 123.982 162.932 110.888C162.932 97.7943 173.538 87.1771 186.617 87.1771ZM89.829 87.1673C102.908 87.1673 113.513 97.7844 113.513 110.878C113.513 123.972 102.908 134.589 89.829 134.589C76.7498 134.589 66.1445 123.972 66.1445 110.878C66.1445 97.7844 76.7498 87.1673 89.829 87.1673Z';
 
@@ -102,7 +103,10 @@ const DemoScene = `function DemoScene(props){${HELPERS}
         R('div',{style:{width:12,height:12,borderRadius:'50%',background:'#FF5F57'}}),
         R('div',{style:{width:12,height:12,borderRadius:'50%',background:'#FEBC2E'}}),
         R('div',{style:{width:12,height:12,borderRadius:'50%',background:'#28C840'}}),
-        R('div',{style:{marginLeft:'12px',color:'#94A3B8',fontSize:'13px',fontFamily:MONO}},'claude  ·  notion MCP')
+        R('img',{src:CLAUDE_ICON_URI,style:{marginLeft:'12px',width:'22px',height:'22px',borderRadius:'4px'}}),
+        R('div',{style:{color:'#E5E7EB',fontSize:'13px',fontFamily:MONO,fontWeight:600}},'claude'),
+        R('div',{style:{color:'#475569',fontSize:'13px',fontFamily:MONO}},'·'),
+        R('div',{style:{color:'#94A3B8',fontSize:'13px',fontFamily:MONO}},'notion MCP')
       ),
       R('div',{style:{padding:'24px 28px',color:'#E5E7EB',fontFamily:MONO,fontSize:'18px',lineHeight:1.7}},
         // PROMPT 1
@@ -209,9 +213,9 @@ const ArchScene = `function ArchScene(props){${HELPERS}
     R('div',{style:{position:'absolute',top:'80px',left:0,right:0,textAlign:'center',fontSize:'34px',fontWeight:700,color:'#111928'}},'How it actually wires up'),
     // Nodes
     node(280,420,n1,R('div',{style:{fontFamily:MONO,fontSize:'32px',color:'#0F172A'}},'> _'),'You','Your prompt'),
-    node(720,420,n2,R('div',{style:{fontFamily:MONO,fontSize:'24px',fontWeight:700,color:'#0084FF'}},'CC'),'Claude Code','MCP client'),
-    node(1200,420,n3,R('div',{style:{fontSize:'42px',fontWeight:900,fontFamily:INTER,color:'#111928'}},'N'),'Notion MCP','mcp.notion.com',null),
-    node(1640,420,n4,R('div',{style:{fontSize:'42px',fontWeight:900,fontFamily:INTER,color:'#111928'}},'N'),'Notion','Your workspace','#F9FAFB'),
+    node(720,420,n2,R('img',{src:CLAUDE_ICON_URI,style:{width:'56px',height:'56px',borderRadius:'12px'}}),'Claude Code','MCP client'),
+    node(1200,420,n3,NotionMark(56,'#111928'),'Notion MCP','mcp.notion.com',null),
+    node(1640,420,n4,NotionMark(56,'#111928'),'Notion','Your workspace','#F9FAFB'),
     // Forward arrows
     arrowSeg(340,660,470,a1,'#0084FF'),
     arrowSeg(780,1140,470,a2,'#0084FF'),
@@ -259,7 +263,10 @@ const InstallScene = `function InstallScene(props){${HELPERS}
         R('div',{style:{width:12,height:12,borderRadius:'50%',background:'#FF5F57'}}),
         R('div',{style:{width:12,height:12,borderRadius:'50%',background:'#FEBC2E'}}),
         R('div',{style:{width:12,height:12,borderRadius:'50%',background:'#28C840'}}),
-        R('div',{style:{marginLeft:'12px',color:'#94A3B8',fontSize:'13px',fontFamily:MONO}},'~/your-project  ·  zsh')
+        R('img',{src:CLAUDE_ICON_URI,style:{marginLeft:'12px',width:'22px',height:'22px',borderRadius:'4px'}}),
+        R('div',{style:{color:'#E5E7EB',fontSize:'13px',fontFamily:MONO,fontWeight:600}},'claude'),
+        R('div',{style:{color:'#94A3B8',fontSize:'13px',fontFamily:MONO}},'·  ~/your-project'),
+        R('div',{style:{marginLeft:'auto',color:'#475569',fontSize:'12px',fontFamily:MONO}},'zsh')
       ),
       R('div',{style:{padding:'40px',color:'#E5E7EB',fontFamily:MONO,fontSize:'24px',lineHeight:1.6}},
         R('div',null,R('span',{style:{color:'#22D3EE'}},'$ '),R('span',null,typed),R('span',{style:{display:'inline-block',width:'10px',height:'26px',background:'#22D3EE',marginLeft:'4px',verticalAlign:'middle',opacity:(Math.floor(f/8)%2)===0?1:0}})),
@@ -267,18 +274,33 @@ const InstallScene = `function InstallScene(props){${HELPERS}
       )
     ),
     // OAuth consent card (bottom-right)
-    f>=120?R('div',{style:{position:'absolute',right:'80px',bottom:'80px',width:'380px',background:'#FFFFFF',borderRadius:'14px',border:'1px solid #E5E7EB',boxShadow:'0 24px 60px rgba(17,25,40,0.18)',padding:'24px',opacity:oauthIn,transform:'translateY('+(20*(1-oauthIn))+'px) scale('+(0.95+0.05*oauthIn)+')'}},
-      R('div',{style:{display:'flex',alignItems:'center',gap:'10px',marginBottom:'14px'}},
-        R('div',{style:{width:32,height:32,borderRadius:'6px',background:'#111928',display:'flex',alignItems:'center',justifyContent:'center',color:'#FFFFFF',fontWeight:900}},'N'),
-        R('div',{style:{fontSize:'14px',color:'#6B7280',fontWeight:600}},'Notion MCP')
+    f>=120?R('div',{style:{position:'absolute',right:'60px',bottom:'70px',width:'420px',background:'#FFFFFF',borderRadius:'14px',border:'1px solid #E5E7EB',boxShadow:'0 24px 60px rgba(17,25,40,0.18)',padding:'24px',opacity:oauthIn,transform:'translateY('+(20*(1-oauthIn))+'px) scale('+(0.95+0.05*oauthIn)+')'}},
+      R('div',{style:{display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',marginBottom:'10px'}},
+        NotionMark(22,'#111928'),
+        R('div',{style:{fontSize:'14px',color:'#374151',fontWeight:500}},'Notion MCP')
       ),
-      R('div',{style:{fontSize:'20px',fontWeight:700,color:'#111928',marginBottom:'4px'}},'Connect with Notion MCP'),
-      R('div',{style:{fontSize:'13px',color:'#6B7280',marginBottom:'14px'}},'Your Workspace  ·  Free Plan  ·  2 members'),
-      R('div',{style:{fontSize:'13px',color:'#374151',lineHeight:1.7,marginBottom:'18px'}},
-        R('div',null,'✓ Respect your access and permissions'),
-        R('div',null,'✓ Take actions on your behalf'),
-        R('div',null,'✓ Search across connected apps'),
-        R('div',null,'✓ View workspace users and emails')
+      R('div',{style:{textAlign:'center',fontSize:'22px',fontWeight:800,color:'#111928',marginBottom:'4px',letterSpacing:'-0.5px'}},'Connect with Notion MCP'),
+      R('div',{style:{textAlign:'center',fontSize:'13px',color:'#6B7280',marginBottom:'14px'}},'Connect your AI tools to Notion'),
+      R('div',{style:{fontSize:'12px',color:'#374151',fontWeight:600,marginBottom:'6px'}},'Select workspace'),
+      R('div',{style:{display:'flex',alignItems:'center',gap:'10px',padding:'8px 12px',border:'1px solid #E5E7EB',borderRadius:'8px',marginBottom:'14px'}},
+        BriefcaseIcon(20,'#A0522D'),
+        R('div',null,
+          R('div',{style:{fontSize:'14px',fontWeight:600,color:'#111928'}},'Your Workspace'),
+          R('div',{style:{fontSize:'11px',color:'#6B7280'}},'Free Plan  ·  2 members')
+        ),
+        R('div',{style:{marginLeft:'auto',color:'#9CA3AF',fontSize:'14px'}},'▾')
+      ),
+      R('div',{style:{fontSize:'11px',color:'#374151',marginBottom:'6px'}},'Through Notion MCP, your AI tool will be able to:'),
+      R('div',{style:{padding:'10px 12px',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'12px',color:'#374151',lineHeight:1.6,marginBottom:'12px'}},
+        R('div',null,R('span',{style:{color:'#0084FF',marginRight:'6px'}},'✓'),'Respect your page and database access'),
+        R('div',null,R('span',{style:{color:'#0084FF',marginRight:'6px'}},'✓'),'Take actions on your behalf'),
+        R('div',null,R('span',{style:{color:'#0084FF',marginRight:'6px'}},'✓'),'Search across connected apps'),
+        R('div',null,R('span',{style:{color:'#0084FF',marginRight:'6px'}},'✓'),'View workspace users and emails')
+      ),
+      R('div',{style:{padding:'10px 12px',background:'#FFF7E6',border:'1px solid #F5C77E',borderRadius:'8px',marginBottom:'12px'}},
+        R('div',{style:{display:'flex',alignItems:'flex-start',gap:'6px',fontSize:'11px',color:'#92400E',marginBottom:'4px'}},R('span',null,'⚠'),R('div',null,'You will be redirected to the following location:')),
+        R('div',{style:{fontFamily:MONO,fontSize:'11px',fontWeight:600,color:'#92400E',marginLeft:'14px',marginBottom:'4px'}},'http://localhost:63090/callback'),
+        R('div',{style:{display:'flex',alignItems:'center',gap:'6px',marginLeft:'14px',fontSize:'11px',color:'#92400E'}},R('span',{style:{display:'inline-block',width:'11px',height:'11px',borderRadius:'2px',background:'#0084FF',color:'#FFFFFF',fontSize:'8px',textAlign:'center',lineHeight:'11px',fontWeight:800}},'✓'),'I recognize and trust this URL')
       ),
       R('div',{style:{height:'40px',borderRadius:'8px',background:grad,color:'#FFFFFF',fontWeight:600,fontSize:'14px',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:f>=150?('0 0 '+(12+12*pulse)+'px rgba(34,197,94,0.45)'):'none'}},'Continue')
     ):null
@@ -365,18 +387,36 @@ const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
   var aOp=fade(0,60),bOp=fade(60,130),cOp=fade(130,200),dOp=fade(200,280);
   var titleIn=ease(cl(f/22));
   return R('div',{style:{width:'100%',height:'100%',background:'#F9FAFB',position:'relative',fontFamily:INTER,opacity:op,overflow:'hidden'}},
-    // Title
-    R('div',{style:{position:'absolute',top:'36px',left:0,right:0,textAlign:'center',fontSize:'30px',fontWeight:700,color:'#111928',opacity:titleIn}},'Same MCP, in FlowHunt.'),
+    // FlowHunt sidebar (always visible, fades with scene)
+    R('div',{style:{position:'absolute',left:0,top:0,bottom:0,width:'220px',background:'#FFFFFF',borderRight:'1px solid #E5E7EB',padding:'18px 14px',opacity:titleIn}},
+      R('div',{style:{display:'flex',alignItems:'center',gap:'8px',marginBottom:'18px'}},
+        R('svg',{width:22,height:22,viewBox:'0 0 275 223'},
+          R('defs',null,R('linearGradient',{id:'sb-g',x1:0,y1:0,x2:1,y2:1},R('stop',{offset:0,stopColor:'#0084FF'}),R('stop',{offset:1,stopColor:'#1A56DB'}))),
+          R('path',{d:'${FH_MARK_PATH}',fill:'url(#sb-g)'})
+        ),
+        R('span',{style:{fontSize:'15px',fontWeight:700,color:'#111928'}},'FlowHunt')
+      ),
+      R('div',{style:{fontSize:'12px',color:'#9CA3AF',fontWeight:600,marginBottom:'8px',padding:'0 6px',letterSpacing:'0.5px'}},'AGENT'),
+      ['Home','Agents Library','My Agents','MCP Servers','Chatbots','History','Integrations'].map(function(label,i){
+        var active=(label==='Integrations'&&f<130)||(label==='My Agents'&&f>=130&&f<280)||(label==='Integrations'&&f>=280);
+        return R('div',{key:i,style:{display:'flex',alignItems:'center',gap:'8px',padding:'7px 8px',borderRadius:'6px',background:active?'#EEF4FF':'transparent',fontSize:'13px',color:active?'#1A56DB':'#374151',fontWeight:active?600:500,marginBottom:'2px'}},
+          R('span',{style:{width:'14px',display:'inline-block',textAlign:'center',opacity:0.7}},'◧'),
+          label
+        );
+      })
+    ),
+    // Title (offset to make room for sidebar)
+    R('div',{style:{position:'absolute',top:'36px',left:'220px',right:0,textAlign:'center',fontSize:'30px',fontWeight:700,color:'#111928',opacity:titleIn}},'Same MCP, in FlowHunt.'),
 
     // Sub-beat A — Integrations search
-    R('div',{style:{position:'absolute',top:'120px',left:'50%',transform:'translateX(-50%)',width:'1300px',height:'780px',background:'#FFFFFF',borderRadius:'14px',border:'1px solid #E5E7EB',boxShadow:'0 24px 50px rgba(17,25,40,0.10)',opacity:aOp,padding:'40px'}},
+    R('div',{style:{position:'absolute',top:'120px',left:'calc(220px + ((100% - 220px)/2))',transform:'translateX(-50%)',width:'1300px',height:'780px',background:'#FFFFFF',borderRadius:'14px',border:'1px solid #E5E7EB',boxShadow:'0 24px 50px rgba(17,25,40,0.10)',opacity:aOp,padding:'40px'}},
       R('div',{style:{fontSize:'22px',fontWeight:700,color:'#111928',marginBottom:'18px'}},'Integrations'),
       R('div',{style:{display:'flex',gap:'12px',marginBottom:'24px'}},
         R('div',{style:{width:'320px',height:'40px',borderRadius:'8px',border:'1px solid #E5E7EB',display:'flex',alignItems:'center',padding:'0 14px',fontSize:'14px',color:'#111928',background:'#FFFFFF'}},R('span',{style:{color:'#9CA3AF',marginRight:'10px'}},'⌕'),'notion'),
         R('div',{style:{width:'120px',height:'40px',borderRadius:'8px',border:'1px solid #E5E7EB',display:'flex',alignItems:'center',padding:'0 14px',fontSize:'14px',color:'#374151'}},'Category  ▾')
       ),
       R('div',{style:{display:'inline-block',width:'320px',padding:'24px',borderRadius:'14px',border:'2px solid #0084FF',background:'#F8FBFF'}},
-        R('div',{style:{width:'52px',height:'52px',borderRadius:'10px',background:'#111928',color:'#FFFFFF',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:'24px',marginBottom:'14px'}},'N'),
+        R('div',{style:{width:'52px',height:'52px',borderRadius:'10px',background:'#FFFFFF',border:'1px solid #E5E7EB',display:'flex',alignItems:'center',justifyContent:'center',marginBottom:'14px'}},NotionMark(32,'#111928')),
         R('div',{style:{fontSize:'20px',fontWeight:700,color:'#111928',marginBottom:'8px'}},'Notion'),
         R('div',{style:{fontSize:'13px',color:'#6B7280',lineHeight:1.5,marginBottom:'18px'}},'Integrate Notion to automate your note-taking, database management, and collaboration workflows'),
         R('div',{style:{height:'36px',borderRadius:'8px',background:grad,color:'#FFFFFF',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'14px',fontWeight:600,boxShadow:f>=40?'0 0 18px rgba(0,132,255,0.45)':'none'}},'Integrate')
@@ -384,10 +424,10 @@ const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
     ),
 
     // Sub-beat B — OAuth picker
-    R('div',{style:{position:'absolute',top:'120px',left:'50%',transform:'translateX(-50%)',width:'520px',background:'#FFFFFF',borderRadius:'14px',border:'1px solid #E5E7EB',boxShadow:'0 24px 50px rgba(17,25,40,0.18)',opacity:bOp,padding:'28px'}},
+    R('div',{style:{position:'absolute',top:'120px',left:'calc(220px + ((100% - 220px)/2))',transform:'translateX(-50%)',width:'520px',background:'#FFFFFF',borderRadius:'14px',border:'1px solid #E5E7EB',boxShadow:'0 24px 50px rgba(17,25,40,0.18)',opacity:bOp,padding:'28px'}},
       R('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'18px'}},
         R('div',{style:{display:'flex',alignItems:'center',gap:'10px'}},
-          R('div',{style:{width:32,height:32,borderRadius:'6px',background:'#111928',color:'#FFFFFF',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900}},'N'),
+          R('div',{style:{width:32,height:32,borderRadius:'6px',background:'#FFFFFF',border:'1px solid #E5E7EB',display:'flex',alignItems:'center',justifyContent:'center'}},NotionMark(20,'#111928')),
           R('div',{style:{fontWeight:600,color:'#111928'}},'Notion')
         ),
         R('div',{style:{display:'flex',alignItems:'center',gap:'6px',fontSize:'13px',color:'#374151'}},R('span',null,'🧰'),'Your Workspace  ▾')
@@ -416,7 +456,7 @@ const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
     ),
 
     // Sub-beat C — Agent canvas
-    R('div',{style:{position:'absolute',top:'120px',left:'50%',transform:'translateX(-50%)',width:'1300px',height:'780px',background:'#FFFFFF',borderRadius:'14px',border:'1px solid #E5E7EB',boxShadow:'0 24px 50px rgba(17,25,40,0.10)',opacity:cOp,padding:'40px',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}},
+    R('div',{style:{position:'absolute',top:'120px',left:'calc(220px + ((100% - 220px)/2))',transform:'translateX(-50%)',width:'1300px',height:'780px',background:'#FFFFFF',borderRadius:'14px',border:'1px solid #E5E7EB',boxShadow:'0 24px 50px rgba(17,25,40,0.10)',opacity:cOp,padding:'40px',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}},
       // Chat Input
       R('div',{style:{width:'200px',height:'56px',borderRadius:'12px',background:'#10B981',color:'#FFFFFF',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:600,marginBottom:'14px'}},'Chat Input'),
       R('div',{style:{width:'2px',height:'24px',background:'#94A3B8'}}),
@@ -433,7 +473,7 @@ const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
             return tools.map(function(t,i){
               var localStart=140+i*4;
               var p=ease(cl((f-localStart)/16));
-              return R('div',{key:i,style:{width:'34px',height:'34px',borderRadius:'8px',background:'#111928',color:'#FFFFFF',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:'14px',opacity:p,transform:'scale('+(0.5+0.5*p)+')'}},'N');
+              return R('div',{key:i,style:{width:'34px',height:'34px',borderRadius:'8px',background:'#FFFFFF',border:'1px solid #E5E7EB',display:'flex',alignItems:'center',justifyContent:'center',opacity:p,transform:'scale('+(0.5+0.5*p)+')'}},NotionMark(20,'#111928'));
             });
           })()
         )
@@ -446,7 +486,7 @@ const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
     ),
 
     // Sub-beat D — Live tool call
-    R('div',{style:{position:'absolute',top:'120px',left:'50%',transform:'translateX(-50%)',width:'1000px',background:'#FFFFFF',borderRadius:'14px',border:'1px solid #E5E7EB',boxShadow:'0 24px 50px rgba(17,25,40,0.10)',opacity:dOp,padding:'32px'}},
+    R('div',{style:{position:'absolute',top:'120px',left:'calc(220px + ((100% - 220px)/2))',transform:'translateX(-50%)',width:'1000px',background:'#FFFFFF',borderRadius:'14px',border:'1px solid #E5E7EB',boxShadow:'0 24px 50px rgba(17,25,40,0.10)',opacity:dOp,padding:'32px'}},
       R('div',{style:{display:'flex',alignItems:'center',gap:'10px',marginBottom:'18px'}},
         R('div',{style:{width:32,height:32,borderRadius:'50%',background:grad,color:'#FFFFFF',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:'14px'}},'∞'),
         R('div',{style:{fontSize:'14px',color:'#6B7280'}},'From: AIAgent')
