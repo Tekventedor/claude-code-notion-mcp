@@ -577,19 +577,22 @@ const template = {
     FlowHuntScene:  { type: 'inline', code: FlowHuntScene },
     CTAScene:       { type: 'inline', code: CTAScene },
   },
-  scenes: [
-    scene('s01-pivot',    F.pivot,    'PivotScene'),
-    scene('s02-demo',     F.demo,     'DemoScene'),
-    scene('s03-arch',     F.arch,     'ArchScene'),
-    scene('s04-install',  F.install,  'InstallScene'),
-    scene('s05-snapshot', F.snapshot, 'SnapshotScene'),
-    scene('s06-flowhunt', F.flowhunt, 'FlowHuntScene'),
-    scene('s07-cta',      F.cta,      'CTAScene'),
-  ],
+  inputs: [],
+  composition: {
+    scenes: [
+      scene('s01-pivot',    F.pivot,    'PivotScene'),
+      scene('s02-demo',     F.demo,     'DemoScene'),
+      scene('s03-arch',     F.arch,     'ArchScene'),
+      scene('s04-install',  F.install,  'InstallScene'),
+      scene('s05-snapshot', F.snapshot, 'SnapshotScene'),
+      scene('s06-flowhunt', F.flowhunt, 'FlowHuntScene'),
+      scene('s07-cta',      F.cta,      'CTAScene'),
+    ],
+  },
 };
 
 // Sanity check: last scene's endFrame must equal output.duration * fps.
-const lastEnd = template.scenes[template.scenes.length - 1].endFrame;
+const lastEnd = template.composition.scenes[template.composition.scenes.length - 1].endFrame;
 const expected = Math.round(template.output.duration * template.output.fps);
 if (lastEnd !== expected) {
   console.error(`ERROR: last endFrame (${lastEnd}) != duration*fps (${expected}). Black-tail risk.`);
@@ -597,4 +600,4 @@ if (lastEnd !== expected) {
 }
 
 writeFileSync(join(__dirname, 'template.json'), JSON.stringify(template, null, 2));
-console.log(`✓ template.json written — ${template.scenes.length} scenes · ${TOTAL_FRAMES} frames · ${TOTAL_SECONDS.toFixed(2)} s`);
+console.log(`✓ template.json written — ${template.composition.scenes.length} scenes · ${TOTAL_FRAMES} frames · ${TOTAL_SECONDS.toFixed(2)} s`);

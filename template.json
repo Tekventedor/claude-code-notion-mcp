@@ -44,328 +44,331 @@
       "code": "function CTAScene(props){var R=React.createElement;var cl=function(x){return Math.max(0,Math.min(1,x));};var ease=function(t){return 1-Math.pow(1-t,3);};var easeIn=function(t){return t*t*t;};var easeInOut=function(t){return t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;};var easeBack=function(t){var c1=1.70158;var c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2);};var lerp=function(a,b,t){return a+(b-a)*t;};var grad='linear-gradient(90deg,#0084FF,#1A56DB)';var INTER=\"Inter,system-ui,sans-serif\";var MONO='\"JetBrains Mono\",ui-monospace,Menlo,monospace';\n  var f=props.frame||0;\n  var END=240;\n  var sceneOut=easeIn(cl((f-(END-16))/16));\n  var op=1-sceneOut;\n  var logoIn=ease(cl(f/22));\n  var divIn=ease(cl((f-24)/16));\n  var titleIn=ease(cl((f-38)/22));\n  var subIn=ease(cl((f-52)/22));\n  var btnIn=ease(cl((f-66)/22));\n  var urlIn=ease(cl((f-100)/24));\n  var btnNudge=Math.sin(f/12)*3;\n  return R('div',{style:{width:'100%',height:'100%',background:'#FFFFFF',position:'relative',fontFamily:INTER,opacity:op,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'18px'}},\n    // FH mark + wordmark\n    R('div',{style:{display:'flex',alignItems:'center',gap:'14px',opacity:logoIn,transform:'translateY('+(8*(1-logoIn))+'px)'}},\n      R('svg',{width:64,height:64,viewBox:'0 0 275 223'},\n        R('defs',null,R('linearGradient',{id:'cta-g',x1:0,y1:0,x2:1,y2:1},R('stop',{offset:0,stopColor:'#0084FF'}),R('stop',{offset:1,stopColor:'#1A56DB'}))),\n        R('path',{d:'M36.369 175.282L24.2163 203.986C22.1071 208.969 23.073 214.948 27.1337 219.014C29.8048 221.688 33.3037 223.02 36.8027 223.02C40.3016 223.02 43.8006 221.688 46.4716 219.014L58.023 207.449L101.627 163.787C103.647 161.764 102.218 158.32 99.3599 158.32H74.5815C74.4336 158.32 74.2858 158.3 74.1281 158.3C48.0289 158.3 26.8578 136.8 27.3506 110.563C27.8335 84.9175 49.2905 64.6304 74.9067 64.6304H127.785C128.633 64.6304 129.451 64.295 130.052 63.6931L151.006 42.7153C153.027 40.6925 151.598 37.2488 148.739 37.2488H75.1531C34.0134 37.2488 -0.365082 70.9455 -0.000396729 112.131C0.236145 138.98 14.7839 162.454 36.3591 175.302L36.369 175.282ZM199.992 158.31C225.608 158.31 247.065 138.023 247.548 112.378C248.031 86.7331 226.87 64.6403 200.77 64.6403C200.613 64.6403 200.445 64.6206 200.287 64.6206H175.529C172.68 64.6206 171.251 61.167 173.262 59.1541L219.103 13.2615H219.093L228.121 4.20336C233.276 -0.957219 241.664 -1.50979 247.124 3.33504C251.707 7.39048 252.88 13.7154 250.662 18.945L238.51 47.639C260.105 60.4763 274.662 83.9505 274.909 110.799C275.273 151.985 240.895 185.692 199.755 185.692H126.159C123.31 185.692 121.881 182.238 123.892 180.225L144.846 159.248C145.447 158.646 146.266 158.31 147.113 158.31H200.002H199.992ZM186.617 87.1771C199.696 87.1771 210.301 97.7943 210.301 110.888C210.301 123.982 199.696 134.599 186.617 134.599C173.538 134.599 162.932 123.982 162.932 110.888C162.932 97.7943 173.538 87.1771 186.617 87.1771ZM89.829 87.1673C102.908 87.1673 113.513 97.7844 113.513 110.878C113.513 123.972 102.908 134.589 89.829 134.589C76.7498 134.589 66.1445 123.972 66.1445 110.878C66.1445 97.7844 76.7498 87.1673 89.829 87.1673Z',fill:'url(#cta-g)'})\n      ),\n      R('span',{style:{fontSize:'48px',fontWeight:800,color:'#111928',letterSpacing:'-1px'}},'FlowHunt')\n    ),\n    // Divider\n    R('div',{style:{width:'200px',height:'2px',background:'#E5E7EB',transform:'scaleX('+divIn+')',opacity:divIn}}),\n    // Title\n    R('div',{style:{fontSize:'52px',fontWeight:800,color:'#111928',letterSpacing:'-1px',textAlign:'center',opacity:titleIn,transform:'translateY('+(10*(1-titleIn))+'px)'}},\n      'How to Use Claude Code with ',\n      R('br',null),\n      R('span',{style:{background:grad,WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundClip:'text'}},'the Notion MCP')\n    ),\n    // Subtitle\n    R('div',{style:{fontSize:'22px',color:'#6B7280',fontWeight:500,opacity:subIn}},'A complete setup guide'),\n    // Button\n    R('div',{style:{padding:'16px 32px',borderRadius:'32px',background:grad,color:'#FFFFFF',fontSize:'20px',fontWeight:600,opacity:btnIn,transform:'translateY('+(10*(1-btnIn))+'px) scale('+(0.92+0.08*btnIn)+')',boxShadow:'0 14px 30px rgba(0,132,255,0.32)',display:'flex',alignItems:'center',gap:'10px'}},\n      'Read the guide',\n      R('span',{style:{transform:'translateX('+btnNudge+'px)',display:'inline-block'}},'→')\n    ),\n    // URL\n    R('div',{style:{fontSize:'18px',color:'#9CA3AF',fontFamily:MONO,opacity:urlIn,marginTop:'8px'}},'flowhunt.io/blog')\n  );\n}"
     }
   },
-  "scenes": [
-    {
-      "id": "s01-pivot",
-      "startFrame": 0,
-      "endFrame": 90,
-      "backgroundColor": "#FFFFFF",
-      "transition": {
-        "type": "fade",
-        "duration": 18
-      },
-      "layers": [
-        {
-          "id": "s01-pivot-layer",
-          "type": "custom",
-          "position": {
-            "x": 0,
-            "y": 0
-          },
-          "size": {
-            "width": 1920,
-            "height": 1080
-          },
-          "customComponent": {
-            "name": "PivotScene",
-            "props": {}
-          }
+  "inputs": [],
+  "composition": {
+    "scenes": [
+      {
+        "id": "s01-pivot",
+        "startFrame": 0,
+        "endFrame": 90,
+        "backgroundColor": "#FFFFFF",
+        "transition": {
+          "type": "fade",
+          "duration": 18
         },
-        {
-          "id": "s01-pivot-watermark",
-          "type": "custom",
-          "position": {
-            "x": 0,
-            "y": 994
+        "layers": [
+          {
+            "id": "s01-pivot-layer",
+            "type": "custom",
+            "position": {
+              "x": 0,
+              "y": 0
+            },
+            "size": {
+              "width": 1920,
+              "height": 1080
+            },
+            "customComponent": {
+              "name": "PivotScene",
+              "props": {}
+            }
           },
-          "size": {
-            "width": 1920,
-            "height": 50
-          },
-          "customComponent": {
-            "name": "Watermark",
-            "props": {
-              "dark": false
+          {
+            "id": "s01-pivot-watermark",
+            "type": "custom",
+            "position": {
+              "x": 0,
+              "y": 994
+            },
+            "size": {
+              "width": 1920,
+              "height": 50
+            },
+            "customComponent": {
+              "name": "Watermark",
+              "props": {
+                "dark": false
+              }
             }
           }
-        }
-      ]
-    },
-    {
-      "id": "s02-demo",
-      "startFrame": 90,
-      "endFrame": 450,
-      "backgroundColor": "#FFFFFF",
-      "transition": {
-        "type": "fade",
-        "duration": 18
+        ]
       },
-      "layers": [
-        {
-          "id": "s02-demo-layer",
-          "type": "custom",
-          "position": {
-            "x": 0,
-            "y": 0
-          },
-          "size": {
-            "width": 1920,
-            "height": 1080
-          },
-          "customComponent": {
-            "name": "DemoScene",
-            "props": {}
-          }
+      {
+        "id": "s02-demo",
+        "startFrame": 90,
+        "endFrame": 450,
+        "backgroundColor": "#FFFFFF",
+        "transition": {
+          "type": "fade",
+          "duration": 18
         },
-        {
-          "id": "s02-demo-watermark",
-          "type": "custom",
-          "position": {
-            "x": 0,
-            "y": 994
+        "layers": [
+          {
+            "id": "s02-demo-layer",
+            "type": "custom",
+            "position": {
+              "x": 0,
+              "y": 0
+            },
+            "size": {
+              "width": 1920,
+              "height": 1080
+            },
+            "customComponent": {
+              "name": "DemoScene",
+              "props": {}
+            }
           },
-          "size": {
-            "width": 1920,
-            "height": 50
-          },
-          "customComponent": {
-            "name": "Watermark",
-            "props": {
-              "dark": false
+          {
+            "id": "s02-demo-watermark",
+            "type": "custom",
+            "position": {
+              "x": 0,
+              "y": 994
+            },
+            "size": {
+              "width": 1920,
+              "height": 50
+            },
+            "customComponent": {
+              "name": "Watermark",
+              "props": {
+                "dark": false
+              }
             }
           }
-        }
-      ]
-    },
-    {
-      "id": "s03-arch",
-      "startFrame": 450,
-      "endFrame": 630,
-      "backgroundColor": "#FFFFFF",
-      "transition": {
-        "type": "fade",
-        "duration": 18
+        ]
       },
-      "layers": [
-        {
-          "id": "s03-arch-layer",
-          "type": "custom",
-          "position": {
-            "x": 0,
-            "y": 0
-          },
-          "size": {
-            "width": 1920,
-            "height": 1080
-          },
-          "customComponent": {
-            "name": "ArchScene",
-            "props": {}
-          }
+      {
+        "id": "s03-arch",
+        "startFrame": 450,
+        "endFrame": 630,
+        "backgroundColor": "#FFFFFF",
+        "transition": {
+          "type": "fade",
+          "duration": 18
         },
-        {
-          "id": "s03-arch-watermark",
-          "type": "custom",
-          "position": {
-            "x": 0,
-            "y": 994
+        "layers": [
+          {
+            "id": "s03-arch-layer",
+            "type": "custom",
+            "position": {
+              "x": 0,
+              "y": 0
+            },
+            "size": {
+              "width": 1920,
+              "height": 1080
+            },
+            "customComponent": {
+              "name": "ArchScene",
+              "props": {}
+            }
           },
-          "size": {
-            "width": 1920,
-            "height": 50
-          },
-          "customComponent": {
-            "name": "Watermark",
-            "props": {
-              "dark": false
+          {
+            "id": "s03-arch-watermark",
+            "type": "custom",
+            "position": {
+              "x": 0,
+              "y": 994
+            },
+            "size": {
+              "width": 1920,
+              "height": 50
+            },
+            "customComponent": {
+              "name": "Watermark",
+              "props": {
+                "dark": false
+              }
             }
           }
-        }
-      ]
-    },
-    {
-      "id": "s04-install",
-      "startFrame": 630,
-      "endFrame": 870,
-      "backgroundColor": "#FFFFFF",
-      "transition": {
-        "type": "fade",
-        "duration": 18
+        ]
       },
-      "layers": [
-        {
-          "id": "s04-install-layer",
-          "type": "custom",
-          "position": {
-            "x": 0,
-            "y": 0
-          },
-          "size": {
-            "width": 1920,
-            "height": 1080
-          },
-          "customComponent": {
-            "name": "InstallScene",
-            "props": {}
-          }
+      {
+        "id": "s04-install",
+        "startFrame": 630,
+        "endFrame": 870,
+        "backgroundColor": "#FFFFFF",
+        "transition": {
+          "type": "fade",
+          "duration": 18
         },
-        {
-          "id": "s04-install-watermark",
-          "type": "custom",
-          "position": {
-            "x": 0,
-            "y": 994
+        "layers": [
+          {
+            "id": "s04-install-layer",
+            "type": "custom",
+            "position": {
+              "x": 0,
+              "y": 0
+            },
+            "size": {
+              "width": 1920,
+              "height": 1080
+            },
+            "customComponent": {
+              "name": "InstallScene",
+              "props": {}
+            }
           },
-          "size": {
-            "width": 1920,
-            "height": 50
-          },
-          "customComponent": {
-            "name": "Watermark",
-            "props": {
-              "dark": false
+          {
+            "id": "s04-install-watermark",
+            "type": "custom",
+            "position": {
+              "x": 0,
+              "y": 994
+            },
+            "size": {
+              "width": 1920,
+              "height": 50
+            },
+            "customComponent": {
+              "name": "Watermark",
+              "props": {
+                "dark": false
+              }
             }
           }
-        }
-      ]
-    },
-    {
-      "id": "s05-snapshot",
-      "startFrame": 870,
-      "endFrame": 1110,
-      "backgroundColor": "#FFFFFF",
-      "transition": {
-        "type": "fade",
-        "duration": 18
+        ]
       },
-      "layers": [
-        {
-          "id": "s05-snapshot-layer",
-          "type": "custom",
-          "position": {
-            "x": 0,
-            "y": 0
-          },
-          "size": {
-            "width": 1920,
-            "height": 1080
-          },
-          "customComponent": {
-            "name": "SnapshotScene",
-            "props": {}
-          }
+      {
+        "id": "s05-snapshot",
+        "startFrame": 870,
+        "endFrame": 1110,
+        "backgroundColor": "#FFFFFF",
+        "transition": {
+          "type": "fade",
+          "duration": 18
         },
-        {
-          "id": "s05-snapshot-watermark",
-          "type": "custom",
-          "position": {
-            "x": 0,
-            "y": 994
+        "layers": [
+          {
+            "id": "s05-snapshot-layer",
+            "type": "custom",
+            "position": {
+              "x": 0,
+              "y": 0
+            },
+            "size": {
+              "width": 1920,
+              "height": 1080
+            },
+            "customComponent": {
+              "name": "SnapshotScene",
+              "props": {}
+            }
           },
-          "size": {
-            "width": 1920,
-            "height": 50
-          },
-          "customComponent": {
-            "name": "Watermark",
-            "props": {
-              "dark": false
+          {
+            "id": "s05-snapshot-watermark",
+            "type": "custom",
+            "position": {
+              "x": 0,
+              "y": 994
+            },
+            "size": {
+              "width": 1920,
+              "height": 50
+            },
+            "customComponent": {
+              "name": "Watermark",
+              "props": {
+                "dark": false
+              }
             }
           }
-        }
-      ]
-    },
-    {
-      "id": "s06-flowhunt",
-      "startFrame": 1110,
-      "endFrame": 1410,
-      "backgroundColor": "#FFFFFF",
-      "transition": {
-        "type": "fade",
-        "duration": 18
+        ]
       },
-      "layers": [
-        {
-          "id": "s06-flowhunt-layer",
-          "type": "custom",
-          "position": {
-            "x": 0,
-            "y": 0
-          },
-          "size": {
-            "width": 1920,
-            "height": 1080
-          },
-          "customComponent": {
-            "name": "FlowHuntScene",
-            "props": {}
-          }
+      {
+        "id": "s06-flowhunt",
+        "startFrame": 1110,
+        "endFrame": 1410,
+        "backgroundColor": "#FFFFFF",
+        "transition": {
+          "type": "fade",
+          "duration": 18
         },
-        {
-          "id": "s06-flowhunt-watermark",
-          "type": "custom",
-          "position": {
-            "x": 0,
-            "y": 994
+        "layers": [
+          {
+            "id": "s06-flowhunt-layer",
+            "type": "custom",
+            "position": {
+              "x": 0,
+              "y": 0
+            },
+            "size": {
+              "width": 1920,
+              "height": 1080
+            },
+            "customComponent": {
+              "name": "FlowHuntScene",
+              "props": {}
+            }
           },
-          "size": {
-            "width": 1920,
-            "height": 50
-          },
-          "customComponent": {
-            "name": "Watermark",
-            "props": {
-              "dark": false
+          {
+            "id": "s06-flowhunt-watermark",
+            "type": "custom",
+            "position": {
+              "x": 0,
+              "y": 994
+            },
+            "size": {
+              "width": 1920,
+              "height": 50
+            },
+            "customComponent": {
+              "name": "Watermark",
+              "props": {
+                "dark": false
+              }
             }
           }
-        }
-      ]
-    },
-    {
-      "id": "s07-cta",
-      "startFrame": 1410,
-      "endFrame": 1650,
-      "backgroundColor": "#FFFFFF",
-      "transition": {
-        "type": "fade",
-        "duration": 18
+        ]
       },
-      "layers": [
-        {
-          "id": "s07-cta-layer",
-          "type": "custom",
-          "position": {
-            "x": 0,
-            "y": 0
-          },
-          "size": {
-            "width": 1920,
-            "height": 1080
-          },
-          "customComponent": {
-            "name": "CTAScene",
-            "props": {}
-          }
+      {
+        "id": "s07-cta",
+        "startFrame": 1410,
+        "endFrame": 1650,
+        "backgroundColor": "#FFFFFF",
+        "transition": {
+          "type": "fade",
+          "duration": 18
         },
-        {
-          "id": "s07-cta-watermark",
-          "type": "custom",
-          "position": {
-            "x": 0,
-            "y": 994
+        "layers": [
+          {
+            "id": "s07-cta-layer",
+            "type": "custom",
+            "position": {
+              "x": 0,
+              "y": 0
+            },
+            "size": {
+              "width": 1920,
+              "height": 1080
+            },
+            "customComponent": {
+              "name": "CTAScene",
+              "props": {}
+            }
           },
-          "size": {
-            "width": 1920,
-            "height": 50
-          },
-          "customComponent": {
-            "name": "Watermark",
-            "props": {
-              "dark": false
+          {
+            "id": "s07-cta-watermark",
+            "type": "custom",
+            "position": {
+              "x": 0,
+              "y": 994
+            },
+            "size": {
+              "width": 1920,
+              "height": 50
+            },
+            "customComponent": {
+              "name": "Watermark",
+              "props": {
+                "dark": false
+              }
             }
           }
-        }
-      ]
-    }
-  ]
+        ]
+      }
+    ]
+  }
 }
