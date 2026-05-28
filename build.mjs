@@ -213,8 +213,8 @@ const ArchScene = `function ArchScene(props){${HELPERS}
     // Travelling dot (on the line, between boxes only)
     dotPhase>=0?R('div',{style:{position:'absolute',left:(dotX-9)+'px',top:'531px',width:'18px',height:'18px',borderRadius:'50%',background:'#0084FF',boxShadow:'0 0 20px #0084FF, 0 0 8px #FFFFFF'}}):null,
 
-    // YOU node (left)
-    R('div',{style:{position:'absolute',left:'220px',top:'430px',width:'180px',opacity:youIn,transform:'scale('+(0.94+0.06*youIn)+')'}},
+    // YOU node (left) — vertically centered around the blue line at y=540
+    R('div',{style:{position:'absolute',left:'220px',top:'460px',width:'180px',opacity:youIn,transform:'scale('+(0.94+0.06*youIn)+')'}},
       R('div',{style:{width:'180px',height:'160px',borderRadius:'18px',background:'#FFFFFF',border:'1px solid #E5E7EB',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 12px 28px rgba(17,25,40,0.08)'}},
         R('div',{style:{fontFamily:MONO,fontSize:'40px',color:'#0F172A'}},'> _')
       ),
@@ -222,51 +222,47 @@ const ArchScene = `function ArchScene(props){${HELPERS}
       R('div',{style:{textAlign:'center',fontSize:'13px',color:'#6B7280'}},'Your prompt')
     ),
 
-    // CLAUDE CODE big middle box (contains Notion MCP card)
-    R('div',{style:{position:'absolute',left:'660px',top:'350px',width:'600px',opacity:ccIn,transform:'scale('+(0.94+0.06*ccIn)+')'}},
-      R('div',{style:{width:'600px',padding:'28px 32px',borderRadius:'24px',background:'#FFFFFF',border:'2px solid #0084FF',boxShadow:'0 20px 40px rgba(0,132,255,0.15)',position:'relative'}},
-        // Claude Code header
-        R('div',{style:{display:'flex',alignItems:'center',gap:'14px'}},
+    // CLAUDE CODE big middle box (contains Notion MCP card) — vertically centered ON the blue line (y=540)
+    R('div',{style:{position:'absolute',left:'50%',top:'540px',transform:'translate(-50%,-50%) scale('+(0.94+0.06*ccIn)+')',width:'600px',opacity:ccIn,transformOrigin:'center center'}},
+      R('div',{style:{width:'600px',padding:'26px 32px',borderRadius:'24px',background:'#FFFFFF',border:'2px solid #0084FF',boxShadow:'0 20px 40px rgba(0,132,255,0.15)',position:'relative'}},
+        // Claude Code header (centered)
+        R('div',{style:{display:'flex',alignItems:'center',justifyContent:'center',gap:'14px'}},
           R('img',{src:CLAUDE_ICON_URI,style:{width:'44px',height:'44px',borderRadius:'10px'}}),
-          R('div',null,
+          R('div',{style:{textAlign:'left'}},
             R('div',{style:{fontSize:'22px',fontWeight:800,color:'#111928',lineHeight:1.1}},'Claude Code'),
             R('div',{style:{fontSize:'12px',color:'#6B7280',marginTop:'2px'}},'MCP host on your machine')
           )
         ),
         // Divider
-        R('div',{style:{height:'1px',background:'#E5E7EB',margin:'22px 0'}}),
-        // Inner Notion MCP card — simple, text-only, no chip tags
-        R('div',{style:{display:'flex',alignItems:'center',gap:'16px',opacity:mcpIn,transform:'translateY('+(12*(1-mcpIn))+'px)'}},
+        R('div',{style:{height:'1px',background:'#E5E7EB',margin:'20px 0'}}),
+        // Inner Notion MCP card — centered content
+        R('div',{style:{display:'flex',alignItems:'center',justifyContent:'center',gap:'16px',opacity:mcpIn,transform:'translateY('+(12*(1-mcpIn))+'px)'}},
           R('div',{style:{width:'48px',height:'48px',borderRadius:'10px',background:'#F9FAFB',border:'1px solid #E5E7EB',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}},NotionMark(28,'#111928')),
-          R('div',{style:{flex:1,minWidth:0}},
+          R('div',{style:{textAlign:'left'}},
             R('div',{style:{display:'flex',alignItems:'baseline',gap:'10px'}},
               R('div',{style:{fontSize:'17px',fontWeight:700,color:'#111928'}},'Notion MCP server'),
               R('div',{style:{fontSize:'12px',color:'#6B7280',fontFamily:MONO}},'mcp.notion.com/mcp')
             ),
             R('div',{style:{marginTop:'4px',fontSize:'13px',color:'#374151'}},'18 tools registered with this Claude Code session')
           ),
-          R('div',{style:{display:'flex',alignItems:'center',gap:'6px',fontSize:'13px',color:'#15803D',fontWeight:600}},
+          R('div',{style:{display:'flex',alignItems:'center',gap:'6px',fontSize:'13px',color:'#15803D',fontWeight:600,marginLeft:'8px'}},
             R('span',{style:{display:'inline-block',width:'9px',height:'9px',borderRadius:'50%',background:'#22C55E'}}),'connected'
           )
         )
       )
     ),
 
-    // NOTION node (right)
-    R('div',{style:{position:'absolute',left:'1520px',top:'430px',width:'180px',opacity:notionIn,transform:'scale('+(0.94+0.06*notionIn)+')'}},
+    // NOTION node (right) — vertically centered around y=540
+    R('div',{style:{position:'absolute',left:'1520px',top:'460px',width:'180px',opacity:notionIn,transform:'scale('+(0.94+0.06*notionIn)+')'}},
       R('div',{style:{width:'180px',height:'160px',borderRadius:'18px',background:'#F9FAFB',border:'1px solid #E5E7EB',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 12px 28px rgba(17,25,40,0.08)'}},NotionMark(60,'#111928')),
       R('div',{style:{textAlign:'center',marginTop:'14px',fontSize:'18px',fontWeight:700,color:'#111928'}},'Notion'),
       R('div',{style:{textAlign:'center',fontSize:'13px',color:'#6B7280'}},'Your workspace')
     ),
 
-    // Symmetric labels — same set above and below the line, both segments
+    // Step labels — BLACK text BELOW the blue line only (no labels above)
     R('div',{style:{opacity:labelsIn}},
-      // Above
-      R('div',{style:{position:'absolute',left:'440px',top:'498px',fontSize:'12px',color:'#0084FF',fontWeight:700,letterSpacing:'1.5px'}},'PROMPT'),
-      R('div',{style:{position:'absolute',left:'1300px',top:'498px',fontSize:'12px',color:'#0084FF',fontWeight:700,letterSpacing:'1.5px'}},'TOOL CALL'),
-      // Below — same labels mirrored
-      R('div',{style:{position:'absolute',left:'440px',top:'560px',fontSize:'12px',color:'#0084FF',fontWeight:700,letterSpacing:'1.5px'}},'PROMPT'),
-      R('div',{style:{position:'absolute',left:'1300px',top:'560px',fontSize:'12px',color:'#0084FF',fontWeight:700,letterSpacing:'1.5px'}},'TOOL CALL')
+      R('div',{style:{position:'absolute',left:'460px',top:'560px',fontSize:'13px',color:'#111928',fontWeight:600}},'Prompt'),
+      R('div',{style:{position:'absolute',left:'1320px',top:'560px',fontSize:'13px',color:'#111928',fontWeight:600}},'Tool call')
     )
   );
 }`;
@@ -489,69 +485,113 @@ const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
       );
     })():null,
 
-    // ─────────── PHASE C — Small AI Agent + live result ───────────
+    // ─────────── PHASE C — Real FlowHunt canvas + live run ───────────
     cOp>0.005?(function(){
-      var chatIn=ease(cl((f-240)/22));
-      var toolIn=ease(cl((f-260)/22));
-      var agentIn=ease(cl((f-228)/22));
+      var canvasIn=ease(cl((f-228)/22));
+      var chatIn=ease(cl((f-244)/22));
+      var toolIn=ease(cl((f-264)/22));
+      // Cascade for the 21 tool tiles inside AI Agent
+      function tilesP(i){return ease(cl((f-(234+i*1.2))/12));}
 
-      // Notion icon for the AI Agent card header (Notion mark, not pink, not emoji)
-      var notionIconEl=R('div',{style:{width:'18px',height:'18px',borderRadius:'4px',background:'#FFFFFF',border:'1px solid #E5E7EB',display:'flex',alignItems:'center',justifyContent:'center'}},NotionMark(12,'#111928'));
-
-      return R('div',{style:{position:'absolute',top:'190px',left:'50%',transform:'translateX(-50%)',width:'1400px',height:'700px',opacity:cOp,display:'flex',gap:'24px'}},
-        // LEFT — small canvas with fhNode AI Agent
-        R('div',{style:{flex:1,background:'#FFFFFF',borderRadius:'14px',border:'1px solid #E5E7EB',position:'relative',overflow:'hidden',padding:'24px',backgroundImage:'radial-gradient(#E5E7EB 1px, transparent 1px)',backgroundSize:'18px 18px'}},
-          // Connections (drawn first, behind nodes)
-          R('svg',{style:{position:'absolute',left:0,top:0,pointerEvents:'none'},width:680,height:700},
-            R('path',{d:'M 100 220 C 180 220, 200 320, 270 320',stroke:'#0084FF',strokeWidth:2,fill:'none',strokeLinecap:'round'}),
-            R('path',{d:'M 470 320 C 540 320, 560 460, 610 460',stroke:'#22C55E',strokeWidth:2,fill:'none',strokeLinecap:'round'}),
-            R('path',{d:'M 370 420 C 370 480, 370 520, 370 560',stroke:'#A78BFA',strokeWidth:2,fill:'none',strokeLinecap:'round',strokeDasharray:'4 4'})
+      return R('div',{style:{position:'absolute',top:'190px',left:'50%',transform:'translateX(-50%)',width:'1480px',height:'720px',opacity:cOp,display:'flex',gap:'20px'}},
+        // ─── LEFT — Real FlowHunt canvas (vertical stack: Chat Input → AI Agent → Chat Output)
+        R('div',{style:{flex:1,background:'#FFFFFF',borderRadius:'14px',border:'1px solid #E5E7EB',overflow:'hidden',display:'flex',flexDirection:'column',opacity:canvasIn}},
+          // FlowHunt mini-toolbar
+          R('div',{style:{padding:'12px 18px',borderBottom:'1px solid #F3F4F6',display:'flex',alignItems:'center',justifyContent:'space-between'}},
+            R('div',{style:{display:'flex',alignItems:'center',gap:'8px',fontSize:'13px',color:'#6B7280'}},
+              R('span',null,'Agents'),R('span',null,'/'),
+              R('span',{style:{color:'#111928',fontWeight:600}},'Using Notion Tool'),
+              R('span',{style:{padding:'2px 8px',fontSize:'11px',background:'#EFF6FF',color:'#0084FF',borderRadius:'4px',fontWeight:600}},'v2')
+            ),
+            R('div',{style:{padding:'6px 14px',fontSize:'12px',fontWeight:700,color:'#FFFFFF',background:'#22C55E',borderRadius:'6px',display:'flex',alignItems:'center',gap:'6px'}},
+              R('span',{style:{fontSize:'10px'}},'▶'),'Run Agent'
+            )
           ),
-          // Chat Input
-          fhNode({key:'in',position:'absolute',x:30,y:190,w:170,headerBg:'#EFF6FF',dot:'#0084FF',title:'Chat Input',opacity:agentIn,ports:[{label:'Message',side:'r',color:'#0084FF'}]}),
-          // AI Agent (small, Notion-branded, NO emoji, NO pink bg)
-          fhNode({key:'agent',position:'absolute',x:240,y:240,w:240,headerBg:'#F3F4F6',dot:'#111928',icon:notionIconEl,title:'AI Agent  ·  Notion',opacity:agentIn,ports:[
-            {label:'Chat History',side:'l',color:'#9CA3AF'},
-            {label:'LLM',side:'l',color:'#F59E0B'},
-            {label:'Tools',side:'l',color:'#A78BFA'},
-            {label:'Input',side:'l',color:'#0084FF'},
-            {label:'Output',side:'r',color:'#22C55E'}
-          ]}),
-          // Notion tools provider (separate node, like figma's MCP Client)
-          fhNode({key:'tools',position:'absolute',x:300,y:560,w:200,headerBg:'#F9FAFB',dot:'#A78BFA',title:'Notion tools (21)',opacity:agentIn,ports:[
-            {label:'Tools out',side:'r',color:'#A78BFA'},
-            {label:'mcp.notion.com',side:'l',color:'#9CA3AF'}
-          ]}),
-          // Chat Output
-          fhNode({key:'out',position:'absolute',x:560,y:430,w:170,headerBg:'#FFF7ED',dot:'#EA580C',title:'Chat Output',opacity:agentIn,ports:[{label:'Message',side:'l',color:'#22C55E'}]})
-        ),
-        // RIGHT — Live result panel
-        R('div',{style:{flex:1.05,background:'#FFFFFF',borderRadius:'14px',border:'1px solid #E5E7EB',padding:'28px',opacity:chatIn,overflow:'hidden'}},
-          R('div',{style:{display:'flex',alignItems:'center',gap:'10px',marginBottom:'18px',paddingBottom:'14px',borderBottom:'1px solid #F3F4F6'}},
-            R('div',{style:{width:'28px',height:'28px',borderRadius:'7px',background:'#FFFFFF',border:'1px solid #E5E7EB',display:'flex',alignItems:'center',justifyContent:'center'}},NotionMark(18,'#111928')),
-            R('div',{style:{fontSize:'15px',fontWeight:700,color:'#111928'}},'Using Notion Tool'),
-            R('div',{style:{marginLeft:'auto',fontSize:'11px',color:'#22C55E',fontWeight:700,display:'flex',alignItems:'center',gap:'5px'}},R('span',{style:{display:'inline-block',width:'7px',height:'7px',borderRadius:'50%',background:'#22C55E'}}),'Live')
-          ),
-          R('div',{style:{display:'inline-block',padding:'10px 16px',borderRadius:'16px 16px 4px 16px',background:'#0084FF',color:'#FFFFFF',fontSize:'14px',marginBottom:'18px',float:'right',clear:'both',maxWidth:'70%'}},'Find the capability demo draft.'),
-          R('div',{style:{clear:'both'}}),
-          R('div',{style:{padding:'16px 18px',borderRadius:'12px',border:'1px solid #E5E7EB',background:'#F9FAFB',opacity:toolIn}},
-            R('div',{style:{display:'flex',alignItems:'center',gap:'10px',marginBottom:'12px'}},
-              R('span',{style:{fontSize:'16px'}},'⚙'),
-              R('div',null,
-                R('div',{style:{fontSize:'14px',fontWeight:600,color:'#111928'}},'Using ',R('span',{style:{fontFamily:MONO,color:'#0084FF'}},'notion_search')),
-                R('div',{style:{fontSize:'11px',color:'#9CA3AF'}},'Search Notion')
+          // Canvas area with dotted grid
+          R('div',{style:{flex:1,position:'relative',backgroundImage:'radial-gradient(#D1D5DB 1px, transparent 1px)',backgroundSize:'20px 20px',padding:'36px 24px',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'2px'}},
+            // ── Chat Input — bold green filled box (real FlowHunt style)
+            R('div',{style:{width:'220px',height:'78px',borderRadius:'14px',background:'#10B981',display:'flex',flexDirection:'column',justifyContent:'space-between',padding:'14px 18px',boxShadow:'0 10px 26px rgba(16,185,129,0.30)'}},
+              R('div',{style:{display:'flex',alignItems:'center',gap:'8px'}},
+                R('span',{style:{display:'inline-block',width:'14px',height:'14px',borderRadius:'4px',background:'rgba(255,255,255,0.45)'}}),
+                R('span',{style:{color:'#FFFFFF',fontSize:'15px',fontWeight:700}},'Chat Input')
               ),
-              R('div',{style:{marginLeft:'auto',fontSize:'11px',color:'#9CA3AF'}},'1103 ms')
+              R('div',{style:{alignSelf:'flex-end',display:'flex',alignItems:'center',gap:'5px',color:'#FFFFFF',fontSize:'11px',opacity:0.9}},'Message',R('span',{style:{display:'inline-block',width:'7px',height:'7px',borderRadius:'50%',background:'#FFFFFF'}}))
             ),
-            R('div',{style:{padding:'10px 14px',background:'#FFFFFF',border:'1px solid #E5E7EB',borderRadius:'8px',fontFamily:MONO,fontSize:'12px',color:'#111928',lineHeight:1.6,marginBottom:'10px'}},
-              R('div',{style:{color:'#9CA3AF',fontSize:'10px',marginBottom:'4px'}},'Input'),
-              R('div',null,'query: "Notion AI capability demo draft"')
+            // + connector
+            R('div',{style:{width:'2px',height:'10px',background:'#94A3B8'}}),
+            R('div',{style:{width:'22px',height:'22px',borderRadius:'50%',background:'#FFFFFF',border:'1.5px solid #0084FF',display:'flex',alignItems:'center',justifyContent:'center',color:'#0084FF',fontSize:'13px',fontWeight:700,lineHeight:1}},'+'),
+            R('div',{style:{width:'2px',height:'10px',background:'#94A3B8'}}),
+            // ── AI Agent — pink dashed border, row of dark N tool tiles inside (real FH look)
+            R('div',{style:{width:'540px',borderRadius:'16px',background:'#FFFFFF',border:'2px dashed #F472B6',padding:'18px 22px',boxShadow:'0 10px 26px rgba(244,114,182,0.15)'}},
+              R('div',{style:{display:'flex',alignItems:'center',gap:'10px',marginBottom:'14px'}},
+                R('div',{style:{display:'flex',alignItems:'center',gap:'8px',padding:'4px 10px',borderRadius:'8px',background:'#FCE7F3'}},
+                  R('span',{style:{display:'inline-block',width:'10px',height:'10px',borderRadius:'2px',background:'#F472B6'}}),
+                  R('span',{style:{fontSize:'13px',fontWeight:700,color:'#BE185D'}},'AI Agent')
+                ),
+                R('div',{style:{marginLeft:'auto',fontSize:'10px',color:'#9CA3AF',fontWeight:600,letterSpacing:'0.5px'}},'21 TOOLS')
+              ),
+              // Horizontal row of dark Notion tiles (icons only — names dropped per user spec)
+              R('div',{style:{display:'flex',flexWrap:'wrap',gap:'5px'}},
+                [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].map(function(i){
+                  var p=tilesP(i);
+                  return R('div',{key:i,style:{width:'22px',height:'22px',borderRadius:'5px',background:'#111928',display:'flex',alignItems:'center',justifyContent:'center',opacity:p,transform:'scale('+(0.6+0.4*p)+')'}},NotionMark(13,'#FFFFFF'));
+                })
+              )
             ),
-            R('div',{style:{padding:'12px 14px',background:'#0F172A',borderRadius:'8px',fontFamily:MONO,fontSize:'11px',color:'#D1D5DB',lineHeight:1.7}},
-              R('div',{style:{color:'#94A3B8',fontSize:'10px',marginBottom:'4px'}},'Output'),
-              R('div',null,'[{"object":"page",'),
-              R('div',null,'  "id":"36d0ad64-336e-80c1-…",'),
-              R('div',null,'  "title":"Notion AI capability demo draft"}]')
+            R('div',{style:{width:'2px',height:'10px',background:'#94A3B8'}}),
+            R('div',{style:{width:'22px',height:'22px',borderRadius:'50%',background:'#FFFFFF',border:'1.5px solid #0084FF',display:'flex',alignItems:'center',justifyContent:'center',color:'#0084FF',fontSize:'13px',fontWeight:700,lineHeight:1}},'+'),
+            R('div',{style:{width:'2px',height:'10px',background:'#94A3B8'}}),
+            // ── Chat Output — bold red filled box
+            R('div',{style:{width:'220px',height:'78px',borderRadius:'14px',background:'#F87171',display:'flex',flexDirection:'column',justifyContent:'space-between',padding:'14px 18px',boxShadow:'0 10px 26px rgba(248,113,113,0.30)'}},
+              R('div',{style:{display:'flex',alignItems:'center',gap:'8px'}},
+                R('span',{style:{display:'inline-block',width:'14px',height:'14px',borderRadius:'4px',background:'rgba(255,255,255,0.45)'}}),
+                R('span',{style:{color:'#FFFFFF',fontSize:'15px',fontWeight:700}},'Chat Output')
+              ),
+              R('div',{style:{alignSelf:'flex-start',display:'flex',alignItems:'center',gap:'5px',color:'#FFFFFF',fontSize:'11px',opacity:0.9}},R('span',{style:{display:'inline-block',width:'7px',height:'7px',borderRadius:'50%',background:'#FFFFFF'}}),'Message')
+            )
+          )
+        ),
+        // ─── RIGHT — Run modal: chat conversation with live tool call
+        R('div',{style:{flex:1,background:'#FFFFFF',borderRadius:'14px',border:'1px solid #E5E7EB',overflow:'hidden',display:'flex',flexDirection:'column',opacity:chatIn}},
+          // Header bar
+          R('div',{style:{padding:'14px 22px',borderBottom:'1px solid #F3F4F6',display:'flex',alignItems:'center',gap:'10px',background:'#F9FAFB'}},
+            R('div',{style:{width:'30px',height:'30px',borderRadius:'7px',background:'#FFFFFF',border:'1px solid #E5E7EB',display:'flex',alignItems:'center',justifyContent:'center'}},NotionMark(18,'#111928')),
+            R('div',{style:{fontSize:'15px',fontWeight:700,color:'#111928'}},'Using Notion Tool'),
+            R('div',{style:{marginLeft:'auto',display:'flex',alignItems:'center',gap:'5px',fontSize:'11px',color:'#22C55E',fontWeight:700}},R('span',{style:{display:'inline-block',width:'7px',height:'7px',borderRadius:'50%',background:'#22C55E'}}),'Live')
+          ),
+          R('div',{style:{flex:1,padding:'22px',overflow:'hidden'}},
+            // User prompt
+            R('div',{style:{display:'flex',justifyContent:'flex-end',marginBottom:'14px'}},
+              R('div',{style:{padding:'10px 16px',borderRadius:'18px 18px 4px 18px',background:'#0084FF',color:'#FFFFFF',fontSize:'14px',maxWidth:'72%'}},'Find the capability demo draft.')
+            ),
+            // From AIAgent label
+            R('div',{style:{fontSize:'11px',color:'#6B7280',marginBottom:'8px'}},'From: AIAgent'),
+            // Tool call collapsible widget (matches real screenshot 20.40.21)
+            R('div',{style:{padding:'14px 16px',borderRadius:'12px',border:'1px solid #E5E7EB',background:'#FFFFFF',opacity:toolIn}},
+              R('div',{style:{display:'flex',alignItems:'center',gap:'10px',marginBottom:'12px'}},
+                R('span',{style:{fontSize:'16px'}},'⚙'),
+                R('div',null,
+                  R('div',{style:{fontSize:'14px',fontWeight:600,color:'#111928'}},'Using ',R('span',{style:{fontFamily:MONO,color:'#0084FF'}},'notion_search')),
+                  R('div',{style:{fontSize:'11px',color:'#9CA3AF',fontFamily:MONO}},'notion_search')
+                ),
+                R('div',{style:{marginLeft:'auto',fontSize:'11px',color:'#9CA3AF'}},'1103 ms  ⌃')
+              ),
+              R('div',{style:{padding:'10px 14px',background:'#F9FAFB',borderRadius:'8px',fontFamily:MONO,fontSize:'12px',color:'#111928',lineHeight:1.6,marginBottom:'8px'}},
+                R('div',{style:{color:'#6B7280',fontSize:'10px',marginBottom:'4px'}},'Input'),
+                R('div',null,'query: "Notion AI capability demo draft"'),
+                R('div',null,'filter_type: page'),
+                R('div',null,'page_size: 10')
+              ),
+              R('div',{style:{padding:'10px 14px',background:'#0F172A',borderRadius:'8px',fontFamily:MONO,fontSize:'11px',color:'#D1D5DB',lineHeight:1.7,marginBottom:'10px'}},
+                R('div',{style:{color:'#94A3B8',fontSize:'10px',marginBottom:'4px'}},'Output'),
+                R('div',null,'[{"object":"page",'),
+                R('div',null,'  "id":"36d0ad64-336e-80c1-…",'),
+                R('div',null,'  "title":"Notion AI capability demo draft"}]')
+              ),
+              R('div',{style:{display:'flex',alignItems:'center',gap:'8px',fontSize:'11px',color:'#6B7280',paddingTop:'4px'}},
+                R('div',{style:{width:'18px',height:'18px',borderRadius:'50%',background:grad,display:'flex',alignItems:'center',justifyContent:'center',color:'#FFFFFF',fontSize:'10px'}},'⌕'),
+                'Search for pages and databases by title in Notion.'
+              )
             )
           )
         )
