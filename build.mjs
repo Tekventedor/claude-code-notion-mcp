@@ -13,11 +13,11 @@ const F = {
   pivot:    { start: 0,    end: 105,  dur: 105 },  // 3.5s
   install:  { start: 105,  end: 345,  dur: 240 },  // 8s  — sped up from 10s
   arch:     { start: 345,  end: 525,  dur: 180 },  // 6s  — sped up from 7s
-  demo:     { start: 525,  end: 735,  dur: 210 },  // 7s  — sped up from 9s
-  flowhunt: { start: 735,  end: 1635, dur: 900 },  // 30s — A Integrations · B Tool scroll (constant velocity) · C Chat with AI Agent loading banners (no inter-turn scroll) · D FH browser slides left + Notion demo on right
-  cta:      { start: 1635, end: 1905, dur: 270 },  // 9s  — tightened single-sentence title
+  demo:     { start: 525,  end: 795,  dur: 270 },  // 9s  — extended so the create-page morph follows the terminal naturally
+  flowhunt: { start: 795,  end: 1665, dur: 870 },  // 29s — Phase B scroll trimmed 30 frames (1.2x faster scroll)
+  cta:      { start: 1665, end: 1935, dur: 270 },  // 9s
 };
-const TOTAL_FRAMES = 1905;
+const TOTAL_FRAMES = 1935;
 const TOTAL_SECONDS = TOTAL_FRAMES / FPS;
 
 const HELPERS = `var R=React.createElement;var cl=function(x){return Math.max(0,Math.min(1,x));};var ease=function(t){return 1-Math.pow(1-t,3);};var easeIn=function(t){return t*t*t;};var easeInOut=function(t){return t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;};var easeBack=function(t){var c1=1.70158;var c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2);};var lerp=function(a,b,t){return a+(b-a)*t;};var grad='linear-gradient(90deg,#0084FF,#1A56DB)';var INTER="Inter,system-ui,sans-serif";var MONO='"JetBrains Mono",ui-monospace,Menlo,monospace';var CLAUDE_ICON_URI='${CLAUDE_ICON}';function NotionMark(size,color){return R('svg',{width:size,height:size,viewBox:'0 0 100 100'},R('path',{d:'M16 18 L16 84 L26 84 L26 38 L72 84 L84 84 L84 18 L74 18 L74 64 L26 18 Z',fill:color||'#111928'}));}function BriefcaseIcon(size,color){return R('svg',{width:size,height:size,viewBox:'0 0 24 24',fill:'none'},R('rect',{x:3,y:7,width:18,height:13,rx:2,fill:color||'#A0522D'}),R('path',{d:'M8 7 V5 a2 2 0 0 1 2-2 h4 a2 2 0 0 1 2 2 V7',stroke:color||'#7C3E1A',strokeWidth:1.5,fill:'none'}),R('rect',{x:3,y:11,width:18,height:2,fill:'rgba(0,0,0,0.18)'}));}function GitHubMark(size){return R('svg',{width:size,height:size,viewBox:'0 0 16 16',fill:'#FFFFFF'},R('path',{d:'M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z'}));}function SlackMark(size){return R('svg',{width:size,height:size,viewBox:'0 0 24 24'},R('rect',{x:2,y:10,width:8,height:4,rx:2,fill:'#36C5F0'}),R('rect',{x:14,y:10,width:8,height:4,rx:2,fill:'#2EB67D'}),R('rect',{x:10,y:2,width:4,height:8,rx:2,fill:'#ECB22E'}),R('rect',{x:10,y:14,width:4,height:8,rx:2,fill:'#E01E5A'}));}function DriveMark(size){return R('svg',{width:size,height:size,viewBox:'0 0 24 24'},R('path',{d:'M7.5 3 L16.5 3 L23 14 L14 14 Z',fill:'#FFD04B'}),R('path',{d:'M7.5 3 L1 14 L5.5 22 L12 11 Z',fill:'#1FA463'}),R('path',{d:'M14 14 L23 14 L18.5 22 L9.5 22 Z',fill:'#3777E3'}));}`;
@@ -81,7 +81,7 @@ const InstallScene = `function InstallScene(props){${HELPERS}
   var authIn=ease(cl((f-138)/14));
   var urlIn=ease(cl((f-157)/14));
   var browserNote=ease(cl((f-173)/14));
-  var oauthIn=ease(cl((f-166)/22));
+  var oauthIn=ease(cl((f-138)/40));   // longer fade so the card eases in cleanly (no popping)
   var pulse=(Math.sin((f-184)/4))*0.5+0.5;
   return R('div',{style:{width:'100%',height:'100%',background:'#F3F4F6',position:'relative',fontFamily:INTER,opacity:op,overflow:'hidden'}},
     // LEFT — terminal (full-height left half)
@@ -97,19 +97,20 @@ const InstallScene = `function InstallScene(props){${HELPERS}
       ),
       R('div',{style:{padding:'28px 32px',color:'#E5E7EB',fontFamily:MONO,fontSize:'17px',lineHeight:1.65}},
         // Step 1: install the MCP server with one command
-        R('div',null,R('span',{style:{color:'#22D3EE'}},'$ '),R('span',null,cmd1Typed),f<70?R('span',{style:{display:'inline-block',width:'9px',height:'18px',background:'#22D3EE',marginLeft:'2px',verticalAlign:'middle',opacity:(Math.floor(f/8)%2)===0?1:0}}):null),
-        f>=72?R('div',{style:{opacity:l1Done,color:'#22C55E',marginTop:'8px'}},'✓ Added MCP server "notion" — http transport, registered for this project.'):null,
-        f>=94?R('div',{style:{opacity:hintP,color:'#94A3B8',fontSize:'14px',marginTop:'4px',marginLeft:'18px'}},'Use --scope user to enable it across every Claude Code project on this machine.'):null,
+        R('div',null,R('span',{style:{color:'#22D3EE'}},'$ '),R('span',null,cmd1Typed),f<54?R('span',{style:{display:'inline-block',width:'9px',height:'18px',background:'#22D3EE',marginLeft:'2px',verticalAlign:'middle',opacity:(Math.floor(f/8)%2)===0?1:0}}):null),
+        f>=58?R('div',{style:{opacity:l1Done,color:'#22C55E',marginTop:'8px'}},'✓ Added MCP server "notion" — http transport, registered for this project.'):null,
+        f>=75?R('div',{style:{opacity:hintP,color:'#94A3B8',fontSize:'14px',marginTop:'4px',marginLeft:'18px'}},'Use --scope user to enable it across every Claude Code project on this machine.'):null,
         // Step 2: launch Claude Code and trigger the OAuth flow with /mcp
-        f>=130?R('div',{style:{opacity:promptMcp,marginTop:'20px'}},R('span',{style:{color:'#22D3EE'}},'$ '),'claude'):null,
-        f>=148?R('div',{style:{opacity:slashIn,marginTop:'10px'}},R('span',{style:{color:'#A78BFA'}},'/'),'mcp'):null,
-        f>=172?R('div',{style:{opacity:authIn,marginTop:'14px',color:'#CBD5E1'}},'Connecting to the Notion MCP server…'):null,
-        f>=196?R('div',{style:{opacity:urlIn,marginTop:'10px',fontSize:'13px',color:'#22D3EE',wordBreak:'break-all'}},'https://mcp.notion.com/authorize?response_type=code&client_id=…'):null,
-        f>=216?R('div',{style:{opacity:browserNote,marginTop:'10px',color:'#94A3B8',fontSize:'14px'}},'Claude Code opened your browser to finish the Notion handshake.'):null
+        f>=104?R('div',{style:{opacity:promptMcp,marginTop:'20px'}},R('span',{style:{color:'#22D3EE'}},'$ '),'claude'):null,
+        f>=118?R('div',{style:{opacity:slashIn,marginTop:'10px'}},R('span',{style:{color:'#A78BFA'}},'/'),'mcp'):null,
+        f>=138?R('div',{style:{opacity:authIn,marginTop:'14px',color:'#CBD5E1'}},'Connecting to the Notion MCP server…'):null,
+        f>=157?R('div',{style:{opacity:urlIn,marginTop:'10px',fontSize:'13px',color:'#22D3EE',wordBreak:'break-all'}},'https://mcp.notion.com/authorize?response_type=code&client_id=…'):null,
+        f>=173?R('div',{style:{opacity:browserNote,marginTop:'10px',color:'#94A3B8',fontSize:'14px'}},'Claude Code opened your browser to finish the Notion handshake.'):null
       )
     ),
     // RIGHT — Notion MCP OAuth consent (full-height right half)
-    f>=180?R('div',{style:{position:'absolute',right:'32px',top:'32px',width:'928px',height:'940px',background:'#FFFFFF',borderRadius:'12px',border:'1px solid #E5E7EB',boxShadow:'0 24px 50px rgba(17,25,40,0.18)',opacity:oauthIn,transform:'translateX('+(20*(1-oauthIn))+'px)',padding:'56px 64px',overflow:'hidden'}},
+    // No hard gate; opacity drives presence so the card fades in cleanly from the start of its window
+    oauthIn>0.005?R('div',{style:{position:'absolute',right:'32px',top:'32px',width:'928px',height:'940px',background:'#FFFFFF',borderRadius:'12px',border:'1px solid #E5E7EB',boxShadow:'0 24px 50px rgba(17,25,40,0.18)',opacity:oauthIn,transform:'translateX('+(30*(1-oauthIn))+'px)',padding:'56px 64px',overflow:'hidden'}},
       // Browser chrome dots
       R('div',{style:{position:'absolute',top:'18px',left:'18px',display:'flex',gap:'8px'}},
         R('div',{style:{width:10,height:10,borderRadius:'50%',background:'#FF5F57'}}),
@@ -256,26 +257,29 @@ const ArchScene = `function ArchScene(props){${HELPERS}
  * ========================================================================== */
 const DemoScene = `function DemoScene(props){${HELPERS}
   var f=props.frame||0;
-  var END=210;
+  var END=270;
   var sceneOut=easeIn(cl((f-(END-20))/20));
   var op=1-sceneOut;
-  var termIn=ease(cl(f/18));
+  var termIn=ease(cl(f/22));
   function typed(text,start,speed){var n=Math.floor(cl((f-start)/speed)*text.length);return text.slice(0,n);}
-  function lineAt(d){return ease(cl((f-d)/7));}
-  // Compressed another 25 % from v8 to fit a 7 s scene.
+  function lineAt(d){return ease(cl((f-d)/8));}
+  // Extended back to a 9s scene so the right-pane morph can wait until AFTER the
+  // terminal's create-pages tool call actually returns success — no more instant page change.
   var prompt1='Search my Notion for "Notion AI capability demo draft".';
-  var prompt1Typed=typed(prompt1,17,23);
-  var t1Call=lineAt(47),t1Res=lineAt(58);
+  var prompt1Typed=typed(prompt1,22,30);
+  var t1Call=lineAt(60),t1Res=lineAt(74);
   var prompt2='Fetch its outline.';
-  var prompt2Typed=typed(prompt2,70,10);
-  var t2Call=lineAt(95),t2Res=lineAt(105),outlineIn=ease(cl((f-113)/18));
+  var prompt2Typed=typed(prompt2,90,13);
+  var t2Call=lineAt(122),t2Res=lineAt(135),outlineIn=ease(cl((f-145)/22));
   var prompt3='Create "Capability Demo Summary" under the same parent.';
-  var prompt3Typed=typed(prompt3,123,22);
-  var t3Call=lineAt(149),t3Res=lineAt(160),t3Url=lineAt(170);
-  var cardOutlineIn=ease(cl((f-47)/18));
-  var cardSourceIn=ease(cl((f-101)/18));
-  var cardMorphP=easeInOut(cl((f-149)/26));
-  var pillIn=ease(cl((f-185)/16));
+  var prompt3Typed=typed(prompt3,158,28);
+  var t3Call=lineAt(192),t3Res=lineAt(206),t3Url=lineAt(218);
+  var cardOutlineIn=ease(cl((f-60)/22));
+  var cardSourceIn=ease(cl((f-130)/22));
+  // Morph waits for the terminal to actually report "✓ Created" before the right pane shifts.
+  // t3Res lands at f=206, t3Url at f=218. Morph starts at f=215 — naturally follows the success.
+  var cardMorphP=easeInOut(cl((f-215)/30));
+  var pillIn=ease(cl((f-238)/18));
   // Terminal + card raised so bottom edge ~= y=920 (well above watermark at y=990)
   var paneTop=32, paneH=888;
   return R('div',{style:{width:'100%',height:'100%',background:'#F3F4F6',fontFamily:INTER,position:'relative',opacity:op,overflow:'hidden'}},
@@ -292,21 +296,21 @@ const DemoScene = `function DemoScene(props){${HELPERS}
       ),
       R('div',{style:{padding:'22px 26px',color:'#E5E7EB',fontFamily:MONO,fontSize:'17px',lineHeight:1.65}},
         R('div',null,R('span',{style:{color:'#9CA3AF'}},'> '),R('span',null,prompt1Typed)),
-        f>=86?R('div',{style:{opacity:t1Call,marginTop:'10px'}},R('span',{style:{color:'#22D3EE'}},'⏺ '),R('span',{style:{color:'#A78BFA'}},'notion - notion-search'),R('span',{style:{color:'#9CA3AF'}},'(query: "Notion AI capability demo draft")')):null,
-        f>=104?R('div',{style:{opacity:t1Res,color:'#22C55E'}},'  ⎿  1 page  ·  36d0ad64...91f1f'):null,
-        f>=128?R('div',{style:{marginTop:'14px'}},R('span',{style:{color:'#9CA3AF'}},'> '),R('span',null,prompt2Typed)):null,
-        f>=172?R('div',{style:{opacity:t2Call,marginTop:'10px'}},R('span',{style:{color:'#22D3EE'}},'⏺ '),R('span',{style:{color:'#A78BFA'}},'notion - notion-fetch'),R('span',{style:{color:'#9CA3AF'}},'(id: 36d0ad64...91f1f)')):null,
-        f>=190?R('div',{style:{opacity:t2Res,color:'#22C55E'}},'  ⎿  4 headings  ·  12 blocks'):null,
-        f>=200?R('div',{style:{opacity:outlineIn,marginTop:'6px',marginLeft:'16px',padding:'8px 14px',background:'rgba(148,163,184,0.08)',borderLeft:'3px solid #1A56DB',borderRadius:'4px',fontSize:'14px',color:'#CBD5E1',lineHeight:1.6}},
+        f>=60?R('div',{style:{opacity:t1Call,marginTop:'10px'}},R('span',{style:{color:'#22D3EE'}},'⏺ '),R('span',{style:{color:'#A78BFA'}},'notion - notion-search'),R('span',{style:{color:'#9CA3AF'}},'(query: "Notion AI capability demo draft")')):null,
+        f>=74?R('div',{style:{opacity:t1Res,color:'#22C55E'}},'  ⎿  1 page  ·  36d0ad64...91f1f'):null,
+        f>=90?R('div',{style:{marginTop:'14px'}},R('span',{style:{color:'#9CA3AF'}},'> '),R('span',null,prompt2Typed)):null,
+        f>=122?R('div',{style:{opacity:t2Call,marginTop:'10px'}},R('span',{style:{color:'#22D3EE'}},'⏺ '),R('span',{style:{color:'#A78BFA'}},'notion - notion-fetch'),R('span',{style:{color:'#9CA3AF'}},'(id: 36d0ad64...91f1f)')):null,
+        f>=135?R('div',{style:{opacity:t2Res,color:'#22C55E'}},'  ⎿  4 headings  ·  12 blocks'):null,
+        f>=145?R('div',{style:{opacity:outlineIn,marginTop:'6px',marginLeft:'16px',padding:'8px 14px',background:'rgba(148,163,184,0.08)',borderLeft:'3px solid #1A56DB',borderRadius:'4px',fontSize:'14px',color:'#CBD5E1',lineHeight:1.6}},
           R('div',null,'# Quick actions'),
           R('div',null,'# Mini slide deck'),
           R('div',null,'# Slide 1: Goal'),
           R('div',null,'# Slide 2: Output types')
         ):null,
-        f>=220?R('div',{style:{marginTop:'14px'}},R('span',{style:{color:'#9CA3AF'}},'> '),R('span',null,prompt3Typed)):null,
-        f>=264?R('div',{style:{opacity:t3Call,marginTop:'10px'}},R('span',{style:{color:'#22D3EE'}},'⏺ '),R('span',{style:{color:'#A78BFA'}},'notion - notion-create-pages'),R('span',{style:{color:'#9CA3AF'}},'({title:"Capability Demo Summary"})')):null,
-        f>=282?R('div',{style:{opacity:t3Res,color:'#22C55E'}},'  ⎿  ✓ Created  ·  7e22ad64...f073'):null,
-        f>=296?R('div',{style:{opacity:t3Url,color:'#22D3EE',textDecoration:'underline',marginLeft:'8px'}},'notion.so/Capability-Demo-Summary'):null,
+        f>=158?R('div',{style:{marginTop:'14px'}},R('span',{style:{color:'#9CA3AF'}},'> '),R('span',null,prompt3Typed)):null,
+        f>=192?R('div',{style:{opacity:t3Call,marginTop:'10px'}},R('span',{style:{color:'#22D3EE'}},'⏺ '),R('span',{style:{color:'#A78BFA'}},'notion - notion-create-pages'),R('span',{style:{color:'#9CA3AF'}},'({title:"Capability Demo Summary"})')):null,
+        f>=206?R('div',{style:{opacity:t3Res,color:'#22C55E'}},'  ⎿  ✓ Created  ·  7e22ad64...f073'):null,
+        f>=218?R('div',{style:{opacity:t3Url,color:'#22D3EE',textDecoration:'underline',marginLeft:'8px'}},'notion.so/Capability-Demo-Summary'):null,
         R('span',{style:{display:'inline-block',width:'10px',height:'18px',background:'#22D3EE',marginLeft:'2px',opacity:(Math.floor(f/8)%2)===0?1:0}})
       )
     ),
@@ -355,30 +359,28 @@ const DemoScene = `function DemoScene(props){${HELPERS}
  * ========================================================================== */
 const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
   var f=props.frame||0;
-  var END=900;
+  var END=870;
   var sceneOut=easeIn(cl((f-(END-22))/22));
   var op=1-sceneOut;
   // Four phases inside a Chrome-wrapped FlowHunt web app.
-  // Phases C and D OVERLAP from ~600 onwards — the Notion tab slides into the right half
-  // while the chat (left) continues showing Turn 3, so the viewer sees the create-pages
-  // tool call AND the resulting Notion page being built at the same time.
+  // Phase B trimmed by 30 frames (scroll is 1.2x faster) — entire scene ends 1s sooner.
+  // Phases C and D OVERLAP from ~570 onwards.
   function fade(a,b){var inF=ease(cl((f-a)/22));var outF=easeIn(cl((f-(b-22))/22));return cl(inF-outF);}
-  var aOp=fade(0, 90);       // A — Integrations marketplace (shorter, cut ~2 s)
-  var bOp=fade(90, 340);     // B — Tool catalog scroll
-  var cOp=fade(340, 870);    // C — Canvas + multi-turn chat (canvas fades around 600 to make room for D)
-  var dOp=fade(600, 900);    // D — Notion page reveal (starts during Turn 3)
+  var aOp=fade(0, 90);
+  var bOp=fade(90, 310);     // B — was 340, ends 30 frames earlier
+  var cOp=fade(310, 840);    // C — starts 30 frames earlier
+  var dOp=fade(570, 870);    // D — starts 30 frames earlier
 
-  // Phase headlines (eyebrow + title) crossfade per phase
   function copyOp(phaseStart, phaseEnd){var inF=ease(cl((f-phaseStart)/18));var outF=easeIn(cl((f-(phaseEnd-18))/18));return cl(inF-outF);}
   var copyA=copyOp(0, 90);
-  var copyB=copyOp(90, 340);
-  var copyC=copyOp(340, 600);
-  var copyD=copyOp(600, 900);
+  var copyB=copyOp(90, 310);
+  var copyC=copyOp(310, 570);
+  var copyD=copyOp(570, 870);
 
-  // Layout: at f<600 chat sits next to a wide canvas. At f>=600 the canvas fades, chat shrinks
-  // to the left half, and the Notion browser slides in on the right half.
-  var dPhase=ease(cl((f-590)/30));   // 0 → 1 over the transition window
-  var canvasOp=1-dPhase;              // canvas fades out as Phase D arrives
+  // Layout: at f<570 chat sits next to a wide canvas. At f>=570 the canvas fades, chat shrinks
+  // and the FH browser shrinks from the right edge to open space for the Notion demo.
+  var dPhase=ease(cl((f-560)/30));   // 0 → 1 over the transition window
+  var canvasOp=1-dPhase;             // canvas fades out as Phase D arrives
 
   // Browser chrome geometry (matches the canonical pattern from the jira reference)
   var browserW=1760, browserH=900;
@@ -421,9 +423,10 @@ const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
   return R('div',{style:{width:'100%',height:'100%',background:'#EEF1F4',position:'relative',fontFamily:INTER,opacity:op,overflow:'hidden'}},
 
     // ────────────────── Chrome browser window ──────────────────
-    // During Phase D the entire FH browser shifts LEFT to make room for the Notion demo
-    // on the right. Visually it looks like the whole webpage is sliding aside.
-    R('div',{style:{position:'absolute',left:browserX+'px',top:browserY+'px',width:browserW+'px',height:browserH+'px',background:'#FFFFFF',borderRadius:'12px',overflow:'hidden',boxShadow:'0 30px 70px rgba(17,25,40,0.22)',border:'1px solid #D1D5DB',transform:'translateX('+lerp(0,-460,dPhase)+'px)'}},
+    // During Phase D the FH browser stays in place but SHRINKS from the right edge
+    // (its right side slides left), opening clean space on the right for the Notion demo —
+    // mirroring Scene 2's split layout. No off-screen overhang.
+    R('div',{style:{position:'absolute',left:browserX+'px',top:browserY+'px',width:lerp(browserW,1140,dPhase)+'px',height:browserH+'px',background:'#FFFFFF',borderRadius:'12px',overflow:'hidden',boxShadow:'0 30px 70px rgba(17,25,40,0.22)',border:'1px solid #D1D5DB'}},
       // Chrome chrome bar — traffic lights + tab
       R('div',{style:{height:chromeBarH+'px',background:'#DEE1E6',display:'flex',alignItems:'flex-end',padding:'0 14px',position:'relative'}},
         R('div',{style:{position:'absolute',left:14,top:12,width:12,height:12,borderRadius:'50%',background:'#FF5F57'}}),
@@ -544,10 +547,9 @@ const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
 
         // ─────────── PHASE B — Tool catalog: 2 columns, constant-velocity scroll ───────────
         bOp>0.005?(function(){
-          // Starts earlier (f=170) and uses LINEAR interpolation so the speed stays equal
-          // throughout — no easeInOut acceleration/deceleration. A short "kickstart" the
-          // first 25 frames moves a touch faster, then settles into constant velocity.
-          var t=cl((f-170)/170);
+          // 1.2x faster scroll. Starts earlier (f=140) and completes in 142 frames (was 170).
+          // Still linear (constant velocity) with a slight kickstart in the first 15%.
+          var t=cl((f-140)/142);
           var scrollT=t<0.15?(t/0.15)*0.30:0.30+((t-0.15)/0.85)*0.70;
           var scrollY=-scrollT*640;
           return R('div',{style:{position:'absolute',inset:'0',padding:'0 32px 28px 32px',opacity:bOp}},
@@ -586,23 +588,19 @@ const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
         // the response lands. The AI Agent canvas fades around f=590 to make room for the
         // Notion-tab reveal on the right.
         cOp>0.005?(function(){
-          var canvasIn=ease(cl((f-352)/22));
-          // Turn 1 — capabilities Q & A (no tool call → chat 3-dot loading)
-          var u1In=ease(cl((f-360)/14));
-          var load1=cl(ease(cl((f-405)/12))-easeIn(cl((f-455)/10)));
-          var r1In=ease(cl((f-460)/16));
-          // Turn 2 — find a page Q + AI Agent loading + tool call + reply
-          // r1 lands at ~470; gap of ~40f gives 1.3s reading before next question
-          var u2In=ease(cl((f-510)/14));
-          var load2=cl(ease(cl((f-540)/12))-easeIn(cl((f-565)/10)));   // AI Agent loading banner
-          var t2In=ease(cl((f-565)/18));
-          var r2In=ease(cl((f-605)/16));
-          // Turn 3 — create a summary page Q + AI Agent loading + tool call + reply
-          // r2 lands at ~620; ~30f gap before u3 lands (per user: "after about 1.5 seconds")
-          var u3In=ease(cl((f-650)/14));
-          var load3=cl(ease(cl((f-680)/12))-easeIn(cl((f-700)/10)));
-          var t3In=ease(cl((f-700)/18));
-          var r3In=ease(cl((f-745)/16));
+          // All Phase C timings shifted -30 frames since Phase B ends 30 frames sooner.
+          var canvasIn=ease(cl((f-322)/22));
+          var u1In=ease(cl((f-330)/14));
+          var load1=cl(ease(cl((f-375)/12))-easeIn(cl((f-425)/10)));
+          var r1In=ease(cl((f-430)/16));
+          var u2In=ease(cl((f-480)/14));
+          var load2=cl(ease(cl((f-510)/12))-easeIn(cl((f-535)/10)));   // AI Agent loading banner
+          var t2In=ease(cl((f-535)/18));
+          var r2In=ease(cl((f-575)/16));
+          var u3In=ease(cl((f-620)/14));
+          var load3=cl(ease(cl((f-650)/12))-easeIn(cl((f-670)/10)));
+          var t3In=ease(cl((f-670)/18));
+          var r3In=ease(cl((f-715)/16));
           // No inter-turn scrolling — all three turns are sized/spaced to fit statically in the panel.
           var chatScrollY=0;
           function tilesP(i){return ease(cl((f-(360+i*1.2))/14));}
@@ -773,11 +771,11 @@ const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
     // half (where the AI Agent canvas just faded away), so the viewer sees the chat AND
     // the page being modified at the same time.
     dOp>0.005?(function(){
-      var slideIn=easeBack(cl((f-610)/30));
-      var pageSettle=ease(cl((f-640)/30));
-      var checkOn=function(d){return ease(cl((f-(820+d))/16));};
-      // Recompute r3In locally so Phase D can flip its "edited" badge when the chat reply lands.
-      var r3InLocal=ease(cl((f-745)/16));
+      // Timings shifted -30 frames to match Phase C's new start.
+      var slideIn=easeBack(cl((f-580)/30));
+      var pageSettle=ease(cl((f-610)/30));
+      var checkOn=function(d){return ease(cl((f-(790+d))/16));};
+      var r3InLocal=ease(cl((f-715)/16));
       // The FH browser has shifted left ~460 px during Phase D, opening a gap on the right.
       // Notion demo sits in that gap — narrower than v8 but full-height and readable.
       var nW=540, nH=720;
