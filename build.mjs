@@ -812,16 +812,16 @@ const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
       var checkOn=function(d){return ease(cl((f-(750+d))/16));};
       var r3InLocal=ease(cl((f-675)/16));
       var r4In=ease(cl((f-815)/16));
-      // Notion demo: Scene-2-style side-by-side. FH is now 920 wide at left:80, so its right
-      // edge sits at 1000. Notion fits cleanly in the right half with a 32px gap.
-      var nW=560, nH=720;
-      var nX=1360;
-      var nY=lerp(1080, 130, slideIn);
+      // Notion demo: touches FH right edge (FH spans 80→1320 when shrunk). Top-aligned with
+      // FH, full FH height, extends to right edge of canvas. No gap, no off-screen.
+      var nW=600, nH=900;
+      var nX=1320;
+      var nY=lerp(1080, 64, slideIn);
       // "Edited X ago" badge — flips from "just now" to "edited a second ago" once r3 lands.
       var editedBadge=r3InLocal>0.5?'edited a second ago':'just now';
-      // Content morph: page first shows a "Creating page…" skeleton, then morphs to the full
-      // Capability Demo Summary. Mirrors the source-page → created-page morph in Scene 4.
-      var contentMorph=easeInOut(cl((f-630)/30));
+      // Content morph: page first shows the SOURCE ("Notion AI capability demo draft"),
+      // then morphs to the CREATED ("Capability Demo Summary") aligned with Turn 3's reply.
+      var contentMorph=easeInOut(cl((f-670)/30));
       var skeletonOp=1-contentMorph;
       var fullOp=contentMorph;
       return R('div',{style:{position:'absolute',left:nX+'px',top:nY+'px',width:nW+'px',height:nH+'px',background:'#FFFFFF',borderRadius:'12px',overflow:'hidden',boxShadow:'0 40px 80px rgba(17,25,40,0.30)',border:'1px solid #D1D5DB',opacity:dOp}},
@@ -832,7 +832,7 @@ const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
           R('div',{style:{position:'absolute',left:50,top:12,width:10,height:10,borderRadius:'50%',background:'#28C840'}}),
           R('div',{style:{marginLeft:'82px',height:'28px',padding:'0 14px',background:'#F4F5F7',borderTopLeftRadius:'9px',borderTopRightRadius:'9px',display:'flex',alignItems:'center',gap:'8px',fontSize:'12px',color:'#172B4D',fontWeight:600}},
             NotionMark(13,'#111928'),
-            R('span',null,'Capability Demo Summary · Notion')
+            R('span',null,(contentMorph<0.5?'Notion AI capability demo draft':'Capability Demo Summary')+' · Notion')
           )
         ),
         R('div',{style:{height:'38px',background:'#F4F5F7',borderBottom:'1px solid #DFE1E6',display:'flex',alignItems:'center',padding:'0 16px',gap:'12px'}},
@@ -840,29 +840,29 @@ const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
           R('div',{style:{flex:1,padding:'5px 14px',background:'#FFFFFF',border:'1px solid #DFE1E6',borderRadius:'14px',fontSize:'12px',color:'#42526E',display:'flex',alignItems:'center',gap:'10px'}},
             R('div',{style:{width:7,height:7,borderRadius:'50%',background:'#22C55E'}}),
             R('span',{style:{color:'#172B4D'}},'notion.so'),
-            R('span',{style:{color:'#6B7280'}},'/Capability-Demo-Summary-7e22ad64336e80b1a4f4c1e0b89df073')
+            R('span',{style:{color:'#6B7280'}},contentMorph<0.5?'/Notion-AI-capability-demo-draft-36d0ad64336e80c18627e0c275f0da3b':'/Capability-Demo-Summary-7e22ad64336e80b1a4f4c1e0b89df073')
           )
         ),
         // Notion page body — TWO STATES overlaid with opacity, morphing skeleton → full content.
         // Mirrors Scene 4's source-page → created-page morph: starts "bad" (empty placeholder),
         // becomes "better" (full Capability Demo Summary with bullets + checklist).
         R('div',{style:{padding:'36px 48px 28px 48px',position:'relative',transform:'translateY('+(16*(1-pageSettle))+'px)',opacity:pageSettle,minHeight:'480px'}},
-          // "Created via Notion MCP" badge at top right (always present once page settles)
-          R('div',{style:{position:'absolute',top:'14px',right:'20px',padding:'4px 10px',background:'#DCFCE7',color:'#15803D',fontSize:'10px',fontWeight:700,borderRadius:'12px',border:'1px solid #86EFAC',display:'flex',alignItems:'center',gap:'5px'}},
+          // "Created via Notion MCP" badge — only visible AFTER the page morphs (created state)
+          R('div',{style:{position:'absolute',top:'14px',right:'20px',padding:'4px 10px',background:'#DCFCE7',color:'#15803D',fontSize:'10px',fontWeight:700,borderRadius:'12px',border:'1px solid #86EFAC',display:'flex',alignItems:'center',gap:'5px',opacity:fullOp}},
             R('span',null,'✓'),'Created via Notion MCP'
           ),
-          // SKELETON (initial "bad" state)
+          // SOURCE PAGE state — the page the agent fetched ("Notion AI capability demo draft").
+          // Mirrors the actual Notion content from the user's workspace, matches Scene 4's right pane.
           R('div',{style:{position:'absolute',left:'48px',right:'48px',top:'36px',opacity:skeletonOp}},
-            R('div',{style:{fontSize:'30px',fontWeight:800,color:'#D1D5DB',letterSpacing:'-0.8px',marginBottom:'10px'}},'Untitled'),
-            R('div',{style:{fontSize:'12px',color:'#9CA3AF',marginBottom:'24px'}},'Creating page…'),
-            R('div',{style:{height:'42px',borderRadius:'8px',background:'#F3F4F6',marginBottom:'12px'}}),
-            R('div',{style:{height:'14px',borderRadius:'4px',background:'#F3F4F6',marginBottom:'8px',width:'30%'}}),
-            R('div',{style:{height:'12px',borderRadius:'4px',background:'#F3F4F6',marginBottom:'6px',width:'85%'}}),
-            R('div',{style:{height:'12px',borderRadius:'4px',background:'#F3F4F6',marginBottom:'6px',width:'78%'}}),
-            R('div',{style:{height:'12px',borderRadius:'4px',background:'#F3F4F6',marginBottom:'16px',width:'70%'}}),
-            R('div',{style:{height:'14px',borderRadius:'4px',background:'#F3F4F6',marginBottom:'8px',width:'25%'}}),
-            R('div',{style:{height:'12px',borderRadius:'4px',background:'#F3F4F6',marginBottom:'6px',width:'82%'}}),
-            R('div',{style:{height:'12px',borderRadius:'4px',background:'#F3F4F6',width:'75%'}})
+            R('div',{style:{fontSize:'30px',fontWeight:800,color:'#111928',letterSpacing:'-0.8px',marginBottom:'20px'}},'Notion AI capability demo draft'),
+            R('div',{style:{fontSize:'17px',fontWeight:700,color:'#111928',marginTop:'14px'}},'Quick actions'),
+            R('div',{style:{fontSize:'13px',color:'#374151',marginTop:'4px'}},'• Add your assignment list as a checklist with due dates'),
+            R('div',{style:{fontSize:'17px',fontWeight:700,color:'#111928',marginTop:'14px'}},'Mini slide deck'),
+            R('div',{style:{fontSize:'13px',color:'#374151',marginTop:'4px'}},'Use Present to view as slides.'),
+            R('div',{style:{fontSize:'17px',fontWeight:700,color:'#111928',marginTop:'14px'}},'Slide 1: Goal'),
+            R('div',{style:{fontSize:'13px',color:'#374151',marginTop:'4px'}},'Show structure: headings, lists, callouts, tables'),
+            R('div',{style:{fontSize:'17px',fontWeight:700,color:'#111928',marginTop:'14px'}},'Slide 2: Output types'),
+            R('div',{style:{fontSize:'13px',color:'#374151',marginTop:'4px'}},'Summaries and outlines')
           ),
           // FULL CONTENT (final "better" state)
           R('div',{style:{position:'absolute',left:'48px',right:'48px',top:'36px',opacity:fullOp}},
