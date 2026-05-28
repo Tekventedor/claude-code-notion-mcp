@@ -13,14 +13,14 @@ const F = {
   pivot:    { start: 0,    end: 105,  dur: 105 },  // 3.5s
   install:  { start: 105,  end: 345,  dur: 240 },  // 8s  — sped up from 10s
   arch:     { start: 345,  end: 525,  dur: 180 },  // 6s  — sped up from 7s
-  demo:     { start: 525,  end: 795,  dur: 270 },  // 9s  — extended so the create-page morph follows the terminal naturally
-  flowhunt: { start: 795,  end: 1665, dur: 870 },  // 29s — Phase B scroll trimmed 30 frames (1.2x faster scroll)
-  cta:      { start: 1665, end: 1935, dur: 270 },  // 9s
+  demo:     { start: 525,  end: 795,  dur: 270 },  // 9s
+  flowhunt: { start: 795,  end: 1625, dur: 830 },  // ~27.7s — Phase B trimmed another 40 frames (linear scroll, no kickstart-then-snail)
+  cta:      { start: 1625, end: 1895, dur: 270 },  // 9s
 };
-const TOTAL_FRAMES = 1935;
+const TOTAL_FRAMES = 1895;
 const TOTAL_SECONDS = TOTAL_FRAMES / FPS;
 
-const HELPERS = `var R=React.createElement;var cl=function(x){return Math.max(0,Math.min(1,x));};var ease=function(t){return 1-Math.pow(1-t,3);};var easeIn=function(t){return t*t*t;};var easeInOut=function(t){return t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;};var easeBack=function(t){var c1=1.70158;var c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2);};var lerp=function(a,b,t){return a+(b-a)*t;};var grad='linear-gradient(90deg,#0084FF,#1A56DB)';var INTER="Inter,system-ui,sans-serif";var MONO='"JetBrains Mono",ui-monospace,Menlo,monospace';var CLAUDE_ICON_URI='${CLAUDE_ICON}';function NotionMark(size,color){return R('svg',{width:size,height:size,viewBox:'0 0 100 100'},R('path',{d:'M16 18 L16 84 L26 84 L26 38 L72 84 L84 84 L84 18 L74 18 L74 64 L26 18 Z',fill:color||'#111928'}));}function BriefcaseIcon(size,color){return R('svg',{width:size,height:size,viewBox:'0 0 24 24',fill:'none'},R('rect',{x:3,y:7,width:18,height:13,rx:2,fill:color||'#A0522D'}),R('path',{d:'M8 7 V5 a2 2 0 0 1 2-2 h4 a2 2 0 0 1 2 2 V7',stroke:color||'#7C3E1A',strokeWidth:1.5,fill:'none'}),R('rect',{x:3,y:11,width:18,height:2,fill:'rgba(0,0,0,0.18)'}));}function GitHubMark(size){return R('svg',{width:size,height:size,viewBox:'0 0 16 16',fill:'#FFFFFF'},R('path',{d:'M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z'}));}function SlackMark(size){return R('svg',{width:size,height:size,viewBox:'0 0 24 24'},R('rect',{x:2,y:10,width:8,height:4,rx:2,fill:'#36C5F0'}),R('rect',{x:14,y:10,width:8,height:4,rx:2,fill:'#2EB67D'}),R('rect',{x:10,y:2,width:4,height:8,rx:2,fill:'#ECB22E'}),R('rect',{x:10,y:14,width:4,height:8,rx:2,fill:'#E01E5A'}));}function DriveMark(size){return R('svg',{width:size,height:size,viewBox:'0 0 24 24'},R('path',{d:'M7.5 3 L16.5 3 L23 14 L14 14 Z',fill:'#FFD04B'}),R('path',{d:'M7.5 3 L1 14 L5.5 22 L12 11 Z',fill:'#1FA463'}),R('path',{d:'M14 14 L23 14 L18.5 22 L9.5 22 Z',fill:'#3777E3'}));}`;
+const HELPERS = `var R=React.createElement;var cl=function(x){return Math.max(0,Math.min(1,x));};var ease=function(t){return 1-Math.pow(1-t,3);};var easeIn=function(t){return t*t*t;};var easeInOut=function(t){return t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;};var easeBack=function(t){var c1=1.70158;var c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2);};var lerp=function(a,b,t){return a+(b-a)*t;};var grad='linear-gradient(90deg,#0084FF,#1A56DB)';var INTER="Inter,system-ui,sans-serif";var MONO='"JetBrains Mono",ui-monospace,Menlo,monospace';var CLAUDE_ICON_URI='${CLAUDE_ICON}';function NotionMark(size,color){return R('svg',{width:size,height:size,viewBox:'0 0 100 100'},R('path',{d:'M16 18 L16 84 L26 84 L26 38 L72 84 L84 84 L84 18 L74 18 L74 64 L26 18 Z',fill:color||'#111928'}));}function BriefcaseIcon(size,color){return R('svg',{width:size,height:size,viewBox:'0 0 24 24',fill:'none'},R('rect',{x:3,y:7,width:18,height:13,rx:2,fill:color||'#A0522D'}),R('path',{d:'M8 7 V5 a2 2 0 0 1 2-2 h4 a2 2 0 0 1 2 2 V7',stroke:color||'#7C3E1A',strokeWidth:1.5,fill:'none'}),R('rect',{x:3,y:11,width:18,height:2,fill:'rgba(0,0,0,0.18)'}));}function SectionLabel(text){return R('div',{style:{position:'absolute',left:'24px',top:'12px',fontSize:'11px',fontWeight:600,color:'#9CA3AF',fontFamily:'"JetBrains Mono",ui-monospace,Menlo,monospace',letterSpacing:'0.4px',opacity:0.55,zIndex:99,pointerEvents:'none'}},text);}function GitHubMark(size){return R('svg',{width:size,height:size,viewBox:'0 0 16 16',fill:'#FFFFFF'},R('path',{d:'M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z'}));}function SlackMark(size){return R('svg',{width:size,height:size,viewBox:'0 0 24 24'},R('rect',{x:2,y:10,width:8,height:4,rx:2,fill:'#36C5F0'}),R('rect',{x:14,y:10,width:8,height:4,rx:2,fill:'#2EB67D'}),R('rect',{x:10,y:2,width:4,height:8,rx:2,fill:'#ECB22E'}),R('rect',{x:10,y:14,width:4,height:8,rx:2,fill:'#E01E5A'}));}function DriveMark(size){return R('svg',{width:size,height:size,viewBox:'0 0 24 24'},R('path',{d:'M7.5 3 L16.5 3 L23 14 L14 14 Z',fill:'#FFD04B'}),R('path',{d:'M7.5 3 L1 14 L5.5 22 L12 11 Z',fill:'#1FA463'}),R('path',{d:'M14 14 L23 14 L18.5 22 L9.5 22 Z',fill:'#3777E3'}));}`;
 
 const FH_MARK_PATH = 'M36.369 175.282L24.2163 203.986C22.1071 208.969 23.073 214.948 27.1337 219.014C29.8048 221.688 33.3037 223.02 36.8027 223.02C40.3016 223.02 43.8006 221.688 46.4716 219.014L58.023 207.449L101.627 163.787C103.647 161.764 102.218 158.32 99.3599 158.32H74.5815C74.4336 158.32 74.2858 158.3 74.1281 158.3C48.0289 158.3 26.8578 136.8 27.3506 110.563C27.8335 84.9175 49.2905 64.6304 74.9067 64.6304H127.785C128.633 64.6304 129.451 64.295 130.052 63.6931L151.006 42.7153C153.027 40.6925 151.598 37.2488 148.739 37.2488H75.1531C34.0134 37.2488 -0.365082 70.9455 -0.000396729 112.131C0.236145 138.98 14.7839 162.454 36.3591 175.302L36.369 175.282ZM199.992 158.31C225.608 158.31 247.065 138.023 247.548 112.378C248.031 86.7331 226.87 64.6403 200.77 64.6403C200.613 64.6403 200.445 64.6206 200.287 64.6206H175.529C172.68 64.6206 171.251 61.167 173.262 59.1541L219.103 13.2615H219.093L228.121 4.20336C233.276 -0.957219 241.664 -1.50979 247.124 3.33504C251.707 7.39048 252.88 13.7154 250.662 18.945L238.51 47.639C260.105 60.4763 274.662 83.9505 274.909 110.799C275.273 151.985 240.895 185.692 199.755 185.692H126.159C123.31 185.692 121.881 182.238 123.892 180.225L144.846 159.248C145.447 158.646 146.266 158.31 147.113 158.31H200.002H199.992ZM186.617 87.1771C199.696 87.1771 210.301 97.7943 210.301 110.888C210.301 123.982 199.696 134.599 186.617 134.599C173.538 134.599 162.932 123.982 162.932 110.888C162.932 97.7943 173.538 87.1771 186.617 87.1771ZM89.829 87.1673C102.908 87.1673 113.513 97.7844 113.513 110.878C113.513 123.972 102.908 134.589 89.829 134.589C76.7498 134.589 66.1445 123.972 66.1445 110.878C66.1445 97.7844 76.7498 87.1673 89.829 87.1673Z';
 
@@ -47,6 +47,7 @@ const PivotScene = `function PivotScene(props){${HELPERS}
   var underP=ease(cl((f-22)/22));
   var subP=ease(cl((f-30)/22));
   return R('div',{style:{width:'100%',height:'100%',background:'#FFFFFF',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',fontFamily:INTER}},
+    SectionLabel('Scene 1 · Pivot'),
     R('div',{style:{opacity:op,textAlign:'center',fontSize:'108px',fontWeight:800,color:'#111928',lineHeight:1.1,letterSpacing:'-2px'}},
       'Notion, inside ',
       R('span',{style:{position:'relative',display:'inline-block'}},
@@ -84,6 +85,7 @@ const InstallScene = `function InstallScene(props){${HELPERS}
   var oauthIn=ease(cl((f-138)/40));   // longer fade so the card eases in cleanly (no popping)
   var pulse=(Math.sin((f-184)/4))*0.5+0.5;
   return R('div',{style:{width:'100%',height:'100%',background:'#F3F4F6',position:'relative',fontFamily:INTER,opacity:op,overflow:'hidden'}},
+    SectionLabel('Scene 2 · Install · OAuth handshake'),
     // LEFT — terminal (full-height left half)
     R('div',{style:{position:'absolute',left:'32px',top:'32px',width:'928px',height:'940px',background:'#0F172A',borderRadius:'12px',boxShadow:'0 24px 50px rgba(17,25,40,0.20)',overflow:'hidden',opacity:termIn,transform:'translateX('+(-30*(1-termIn))+'px)'}},
       R('div',{style:{height:'48px',background:'#1E293B',display:'flex',alignItems:'center',padding:'0 14px',gap:'10px'}},
@@ -178,6 +180,7 @@ const ArchScene = `function ArchScene(props){${HELPERS}
   }
 
   return R('div',{style:{width:'100%',height:'100%',background:'#FFFFFF',position:'relative',fontFamily:INTER,opacity:op}},
+    SectionLabel('Scene 3 · Architecture'),
     // Title
     R('div',{style:{position:'absolute',top:'74px',left:0,right:0,textAlign:'center',fontSize:'32px',fontWeight:800,color:'#111928',opacity:titleIn,letterSpacing:'-0.5px'}},'The Notion MCP lives inside Claude Code itself.'),
     R('div',{style:{position:'absolute',top:'120px',left:0,right:0,textAlign:'center',fontSize:'19px',color:'#6B7280',opacity:titleIn,maxWidth:'900px',margin:'0 auto'}},'You write a prompt, Claude Code routes it through the MCP server, and Notion answers — all without leaving your terminal.'),
@@ -283,6 +286,7 @@ const DemoScene = `function DemoScene(props){${HELPERS}
   // Terminal + card raised so bottom edge ~= y=920 (well above watermark at y=990)
   var paneTop=32, paneH=888;
   return R('div',{style:{width:'100%',height:'100%',background:'#F3F4F6',fontFamily:INTER,position:'relative',opacity:op,overflow:'hidden'}},
+    SectionLabel('Scene 4 · Demo · search → fetch → create'),
     // LEFT — terminal
     R('div',{style:{position:'absolute',left:'32px',top:paneTop+'px',width:'928px',height:paneH+'px',background:'#0F172A',borderRadius:'12px',boxShadow:'0 24px 50px rgba(17,25,40,0.20)',overflow:'hidden',opacity:termIn,transform:'translateX('+(-30*(1-termIn))+'px)'}},
       R('div',{style:{height:'48px',background:'#1E293B',display:'flex',alignItems:'center',padding:'0 14px',gap:'10px'}},
@@ -359,28 +363,26 @@ const DemoScene = `function DemoScene(props){${HELPERS}
  * ========================================================================== */
 const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
   var f=props.frame||0;
-  var END=870;
+  var END=830;
   var sceneOut=easeIn(cl((f-(END-22))/22));
   var op=1-sceneOut;
-  // Four phases inside a Chrome-wrapped FlowHunt web app.
-  // Phase B trimmed by 30 frames (scroll is 1.2x faster) — entire scene ends 1s sooner.
-  // Phases C and D OVERLAP from ~570 onwards.
+  // Phase B trimmed another 40 frames — scroll is now pure linear and finishes by f=240.
   function fade(a,b){var inF=ease(cl((f-a)/22));var outF=easeIn(cl((f-(b-22))/22));return cl(inF-outF);}
   var aOp=fade(0, 90);
-  var bOp=fade(90, 310);     // B — was 340, ends 30 frames earlier
-  var cOp=fade(310, 840);    // C — starts 30 frames earlier
-  var dOp=fade(570, 870);    // D — starts 30 frames earlier
+  var bOp=fade(90, 270);     // B ends at 270 (was 310)
+  var cOp=fade(270, 800);    // C shifts -40
+  var dOp=fade(530, 830);    // D shifts -40
 
   function copyOp(phaseStart, phaseEnd){var inF=ease(cl((f-phaseStart)/18));var outF=easeIn(cl((f-(phaseEnd-18))/18));return cl(inF-outF);}
   var copyA=copyOp(0, 90);
-  var copyB=copyOp(90, 310);
-  var copyC=copyOp(310, 570);
-  var copyD=copyOp(570, 870);
+  var copyB=copyOp(90, 270);
+  var copyC=copyOp(270, 530);
+  var copyD=copyOp(530, 830);
 
-  // Layout: at f<570 chat sits next to a wide canvas. At f>=570 the canvas fades, chat shrinks
-  // and the FH browser shrinks from the right edge to open space for the Notion demo.
-  var dPhase=ease(cl((f-560)/30));   // 0 → 1 over the transition window
-  var canvasOp=1-dPhase;             // canvas fades out as Phase D arrives
+  // Layout transition: at f<530 chat sits next to the canvas. From f=520 the canvas fades,
+  // and the FH browser shrinks to ~half-width while the Notion demo slides in on the right.
+  var dPhase=ease(cl((f-520)/30));   // 0 → 1 over the transition window
+  var canvasOp=1-dPhase;
 
   // Browser chrome geometry (matches the canonical pattern from the jira reference)
   var browserW=1760, browserH=900;
@@ -421,12 +423,13 @@ const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
   }
 
   return R('div',{style:{width:'100%',height:'100%',background:'#EEF1F4',position:'relative',fontFamily:INTER,opacity:op,overflow:'hidden'}},
+    SectionLabel(f<90?'Scene 5 · Phase A — Marketplace':f<270?'Scene 5 · Phase B — Tool catalog':f<530?'Scene 5 · Phase C — Chat':'Scene 5 · Phase D — Notion result'),
 
     // ────────────────── Chrome browser window ──────────────────
-    // During Phase D the FH browser stays in place but SHRINKS from the right edge
-    // (its right side slides left), opening clean space on the right for the Notion demo —
-    // mirroring Scene 2's split layout. No off-screen overhang.
-    R('div',{style:{position:'absolute',left:browserX+'px',top:browserY+'px',width:lerp(browserW,1140,dPhase)+'px',height:browserH+'px',background:'#FFFFFF',borderRadius:'12px',overflow:'hidden',boxShadow:'0 30px 70px rgba(17,25,40,0.22)',border:'1px solid #D1D5DB'}},
+    // During Phase D the FH browser stays anchored at its left edge but SHRINKS to ~half
+    // the canvas (920 px) — mirroring Scene 2's clean side-by-side split. The Notion demo
+    // takes the matching half on the right with a 32px gap. No overlap, no off-screen.
+    R('div',{style:{position:'absolute',left:browserX+'px',top:browserY+'px',width:lerp(browserW,920,dPhase)+'px',height:browserH+'px',background:'#FFFFFF',borderRadius:'12px',overflow:'hidden',boxShadow:'0 30px 70px rgba(17,25,40,0.22)',border:'1px solid #D1D5DB'}},
       // Chrome chrome bar — traffic lights + tab
       R('div',{style:{height:chromeBarH+'px',background:'#DEE1E6',display:'flex',alignItems:'flex-end',padding:'0 14px',position:'relative'}},
         R('div',{style:{position:'absolute',left:14,top:12,width:12,height:12,borderRadius:'50%',background:'#FF5F57'}}),
@@ -547,10 +550,9 @@ const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
 
         // ─────────── PHASE B — Tool catalog: 2 columns, constant-velocity scroll ───────────
         bOp>0.005?(function(){
-          // 1.2x faster scroll. Starts earlier (f=140) and completes in 142 frames (was 170).
-          // Still linear (constant velocity) with a slight kickstart in the first 15%.
-          var t=cl((f-140)/142);
-          var scrollT=t<0.15?(t/0.15)*0.30:0.30+((t-0.15)/0.85)*0.70;
+          // Pure linear scroll, constant velocity throughout — no kickstart + snail.
+          // 100 frames total travel from f=140 to f=240.
+          var scrollT=cl((f-140)/100);
           var scrollY=-scrollT*640;
           return R('div',{style:{position:'absolute',inset:'0',padding:'0 32px 28px 32px',opacity:bOp}},
             R('div',{style:{background:'#FFFFFF',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'22px 28px',height:'100%',display:'flex',flexDirection:'column'}},
@@ -588,19 +590,19 @@ const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
         // the response lands. The AI Agent canvas fades around f=590 to make room for the
         // Notion-tab reveal on the right.
         cOp>0.005?(function(){
-          // All Phase C timings shifted -30 frames since Phase B ends 30 frames sooner.
-          var canvasIn=ease(cl((f-322)/22));
-          var u1In=ease(cl((f-330)/14));
-          var load1=cl(ease(cl((f-375)/12))-easeIn(cl((f-425)/10)));
-          var r1In=ease(cl((f-430)/16));
-          var u2In=ease(cl((f-480)/14));
-          var load2=cl(ease(cl((f-510)/12))-easeIn(cl((f-535)/10)));   // AI Agent loading banner
-          var t2In=ease(cl((f-535)/18));
-          var r2In=ease(cl((f-575)/16));
-          var u3In=ease(cl((f-620)/14));
-          var load3=cl(ease(cl((f-650)/12))-easeIn(cl((f-670)/10)));
-          var t3In=ease(cl((f-670)/18));
-          var r3In=ease(cl((f-715)/16));
+          // Phase C timings shifted another -40 frames (-70 from v8 baseline).
+          var canvasIn=ease(cl((f-282)/22));
+          var u1In=ease(cl((f-290)/14));
+          var load1=cl(ease(cl((f-335)/12))-easeIn(cl((f-385)/10)));
+          var r1In=ease(cl((f-390)/16));
+          var u2In=ease(cl((f-440)/14));
+          var load2=cl(ease(cl((f-470)/12))-easeIn(cl((f-495)/10)));
+          var t2In=ease(cl((f-495)/18));
+          var r2In=ease(cl((f-535)/16));
+          var u3In=ease(cl((f-580)/14));
+          var load3=cl(ease(cl((f-610)/12))-easeIn(cl((f-630)/10)));
+          var t3In=ease(cl((f-630)/18));
+          var r3In=ease(cl((f-675)/16));
           // No inter-turn scrolling — all three turns are sized/spaced to fit statically in the panel.
           var chatScrollY=0;
           function tilesP(i){return ease(cl((f-(360+i*1.2))/14));}
@@ -771,19 +773,23 @@ const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
     // half (where the AI Agent canvas just faded away), so the viewer sees the chat AND
     // the page being modified at the same time.
     dOp>0.005?(function(){
-      // Timings shifted -30 frames to match Phase C's new start.
-      var slideIn=easeBack(cl((f-580)/30));
-      var pageSettle=ease(cl((f-610)/30));
-      var checkOn=function(d){return ease(cl((f-(790+d))/16));};
-      var r3InLocal=ease(cl((f-715)/16));
-      // The FH browser has shifted left ~460 px during Phase D, opening a gap on the right.
-      // Notion demo sits in that gap — narrower than v8 but full-height and readable.
-      var nW=540, nH=720;
-      var nX=1370;
+      // Timings shifted -40 frames to match Phase C's new start.
+      var slideIn=easeBack(cl((f-540)/30));
+      var pageSettle=ease(cl((f-570)/30));
+      var checkOn=function(d){return ease(cl((f-(750+d))/16));};
+      var r3InLocal=ease(cl((f-675)/16));
+      // Notion demo: Scene-2-style side-by-side. FH is now 920 wide at left:80, so its right
+      // edge sits at 1000. Notion fits cleanly in the right half with a 32px gap.
+      var nW=896, nH=720;
+      var nX=1000;
       var nY=lerp(1080, 130, slideIn);
-      // "Edited X ago" badge — flips from "just now" (while the agent is creating) to
-      // "edited a second ago" once the chat reply (r3InLocal) lands.
+      // "Edited X ago" badge — flips from "just now" to "edited a second ago" once r3 lands.
       var editedBadge=r3InLocal>0.5?'edited a second ago':'just now';
+      // Content morph: page first shows a "Creating page…" skeleton, then morphs to the full
+      // Capability Demo Summary. Mirrors the source-page → created-page morph in Scene 4.
+      var contentMorph=easeInOut(cl((f-630)/30));
+      var skeletonOp=1-contentMorph;
+      var fullOp=contentMorph;
       return R('div',{style:{position:'absolute',left:nX+'px',top:nY+'px',width:nW+'px',height:nH+'px',background:'#FFFFFF',borderRadius:'12px',overflow:'hidden',boxShadow:'0 40px 80px rgba(17,25,40,0.30)',border:'1px solid #D1D5DB',opacity:dOp}},
         // Notion browser chrome — traffic lights + tab + URL
         R('div',{style:{height:'36px',background:'#DEE1E6',display:'flex',alignItems:'flex-end',padding:'0 14px',position:'relative'}},
@@ -803,46 +809,59 @@ const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
             R('span',{style:{color:'#6B7280'}},'/Capability-Demo-Summary-7e22ad64336e80b1a4f4c1e0b89df073')
           )
         ),
-        // Notion page body — scaled for the narrower right-half tab
-        R('div',{style:{padding:'36px 48px 28px 48px',position:'relative',transform:'translateY('+(16*(1-pageSettle))+'px)',opacity:pageSettle}},
-          // "Created via Notion MCP" badge at top right
+        // Notion page body — TWO STATES overlaid with opacity, morphing skeleton → full content.
+        // Mirrors Scene 4's source-page → created-page morph: starts "bad" (empty placeholder),
+        // becomes "better" (full Capability Demo Summary with bullets + checklist).
+        R('div',{style:{padding:'36px 48px 28px 48px',position:'relative',transform:'translateY('+(16*(1-pageSettle))+'px)',opacity:pageSettle,minHeight:'480px'}},
+          // "Created via Notion MCP" badge at top right (always present once page settles)
           R('div',{style:{position:'absolute',top:'14px',right:'20px',padding:'4px 10px',background:'#DCFCE7',color:'#15803D',fontSize:'10px',fontWeight:700,borderRadius:'12px',border:'1px solid #86EFAC',display:'flex',alignItems:'center',gap:'5px'}},
             R('span',null,'✓'),'Created via Notion MCP'
           ),
-          // Page header
-          R('div',{style:{fontSize:'30px',fontWeight:800,color:'#111928',letterSpacing:'-0.8px',marginBottom:'6px'}},'Capability Demo Summary'),
-          // Dynamic "edited" badge — flips to "edited a second ago" when the chat reply lands
-          R('div',{style:{fontSize:'12px',color:'#9CA3AF',marginBottom:'20px',display:'flex',alignItems:'center',gap:'8px'}},
-            R('span',null,'Created by Using Notion Tool'),
-            R('span',{style:{color:'#D1D5DB'}},'·'),
-            R('span',{style:{color:r3InLocal>0.5?'#15803D':'#9CA3AF',fontWeight:r3InLocal>0.5?600:400,transition:'color 0.3s'}},editedBadge)
+          // SKELETON (initial "bad" state)
+          R('div',{style:{position:'absolute',left:'48px',right:'48px',top:'36px',opacity:skeletonOp}},
+            R('div',{style:{fontSize:'30px',fontWeight:800,color:'#D1D5DB',letterSpacing:'-0.8px',marginBottom:'10px'}},'Untitled'),
+            R('div',{style:{fontSize:'12px',color:'#9CA3AF',marginBottom:'24px'}},'Creating page…'),
+            R('div',{style:{height:'42px',borderRadius:'8px',background:'#F3F4F6',marginBottom:'12px'}}),
+            R('div',{style:{height:'14px',borderRadius:'4px',background:'#F3F4F6',marginBottom:'8px',width:'30%'}}),
+            R('div',{style:{height:'12px',borderRadius:'4px',background:'#F3F4F6',marginBottom:'6px',width:'85%'}}),
+            R('div',{style:{height:'12px',borderRadius:'4px',background:'#F3F4F6',marginBottom:'6px',width:'78%'}}),
+            R('div',{style:{height:'12px',borderRadius:'4px',background:'#F3F4F6',marginBottom:'16px',width:'70%'}}),
+            R('div',{style:{height:'14px',borderRadius:'4px',background:'#F3F4F6',marginBottom:'8px',width:'25%'}}),
+            R('div',{style:{height:'12px',borderRadius:'4px',background:'#F3F4F6',marginBottom:'6px',width:'82%'}}),
+            R('div',{style:{height:'12px',borderRadius:'4px',background:'#F3F4F6',width:'75%'}})
           ),
-          // Callout block with source — sized down for the narrower tab
-          R('div',{style:{padding:'12px 16px',background:'#EEF4FF',border:'1px solid #DBE7FF',borderRadius:'10px',color:'#1A56DB',fontSize:'13px',marginBottom:'20px',display:'flex',alignItems:'center',gap:'10px'}},
-            R('div',{style:{width:'20px',height:'20px',borderRadius:'5px',background:'#FFFFFF',border:'1px solid #DBE7FF',display:'flex',alignItems:'center',justifyContent:'center'}},NotionMark(12,'#111928')),
-            R('div',null,R('span',{style:{fontWeight:700}},'Source: '),'Notion AI capability demo draft')
-          ),
-          // Summary section
-          R('div',{style:{fontSize:'18px',fontWeight:700,color:'#111928',marginBottom:'8px'}},'Summary'),
-          R('div',{style:{fontSize:'13px',color:'#374151',lineHeight:1.65,marginBottom:'18px'}},
-            R('div',null,'•  Quick actions for ad-hoc checklists and rewrites.'),
-            R('div',null,'•  A mini slide deck used in Presentation Mode.'),
-            R('div',null,'•  Two example slides covering goal and output types.')
-          ),
-          // Follow-ups checklist
-          R('div',{style:{fontSize:'18px',fontWeight:700,color:'#111928',marginBottom:'8px'}},'Follow-ups'),
-          R('div',{style:{fontSize:'13px',color:'#374151',lineHeight:1.85}},
-            R('div',{style:{display:'flex',alignItems:'center',gap:'10px'}},
-              R('div',{style:{width:'14px',height:'14px',borderRadius:'3px',border:'1.5px solid #9CA3AF',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'9px',color:'#FFFFFF',background:checkOn(0)>0.5?'#22C55E':'transparent',borderColor:checkOn(0)>0.5?'#22C55E':'#9CA3AF'}},checkOn(0)>0.5?'✓':''),
-              R('span',null,'Pick a real "Quick actions" task to walk through with the agent.')
+          // FULL CONTENT (final "better" state)
+          R('div',{style:{position:'absolute',left:'48px',right:'48px',top:'36px',opacity:fullOp}},
+            R('div',{style:{fontSize:'30px',fontWeight:800,color:'#111928',letterSpacing:'-0.8px',marginBottom:'6px'}},'Capability Demo Summary'),
+            R('div',{style:{fontSize:'12px',color:'#9CA3AF',marginBottom:'20px',display:'flex',alignItems:'center',gap:'8px'}},
+              R('span',null,'Created by Using Notion Tool'),
+              R('span',{style:{color:'#D1D5DB'}},'·'),
+              R('span',{style:{color:r3InLocal>0.5?'#15803D':'#9CA3AF',fontWeight:r3InLocal>0.5?600:400}},editedBadge)
             ),
-            R('div',{style:{display:'flex',alignItems:'center',gap:'10px'}},
-              R('div',{style:{width:'14px',height:'14px',borderRadius:'3px',border:'1.5px solid #9CA3AF'}}),
-              R('span',null,'Record the slide deck as a thirty-second screen capture.')
+            R('div',{style:{padding:'12px 16px',background:'#EEF4FF',border:'1px solid #DBE7FF',borderRadius:'10px',color:'#1A56DB',fontSize:'13px',marginBottom:'20px',display:'flex',alignItems:'center',gap:'10px'}},
+              R('div',{style:{width:'20px',height:'20px',borderRadius:'5px',background:'#FFFFFF',border:'1px solid #DBE7FF',display:'flex',alignItems:'center',justifyContent:'center'}},NotionMark(12,'#111928')),
+              R('div',null,R('span',{style:{fontWeight:700}},'Source: '),'Notion AI capability demo draft')
             ),
-            R('div',{style:{display:'flex',alignItems:'center',gap:'10px'}},
-              R('div',{style:{width:'14px',height:'14px',borderRadius:'3px',border:'1.5px solid #9CA3AF'}}),
-              R('span',null,'Link this summary back from the source page.')
+            R('div',{style:{fontSize:'18px',fontWeight:700,color:'#111928',marginBottom:'8px'}},'Summary'),
+            R('div',{style:{fontSize:'13px',color:'#374151',lineHeight:1.65,marginBottom:'18px'}},
+              R('div',null,'•  Quick actions for ad-hoc checklists and rewrites.'),
+              R('div',null,'•  A mini slide deck used in Presentation Mode.'),
+              R('div',null,'•  Two example slides covering goal and output types.')
+            ),
+            R('div',{style:{fontSize:'18px',fontWeight:700,color:'#111928',marginBottom:'8px'}},'Follow-ups'),
+            R('div',{style:{fontSize:'13px',color:'#374151',lineHeight:1.85}},
+              R('div',{style:{display:'flex',alignItems:'center',gap:'10px'}},
+                R('div',{style:{width:'14px',height:'14px',borderRadius:'3px',border:'1.5px solid #9CA3AF',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'9px',color:'#FFFFFF',background:checkOn(0)>0.5?'#22C55E':'transparent',borderColor:checkOn(0)>0.5?'#22C55E':'#9CA3AF'}},checkOn(0)>0.5?'✓':''),
+                R('span',null,'Pick a real "Quick actions" task to walk through with the agent.')
+              ),
+              R('div',{style:{display:'flex',alignItems:'center',gap:'10px'}},
+                R('div',{style:{width:'14px',height:'14px',borderRadius:'3px',border:'1.5px solid #9CA3AF'}}),
+                R('span',null,'Record the slide deck as a thirty-second screen capture.')
+              ),
+              R('div',{style:{display:'flex',alignItems:'center',gap:'10px'}},
+                R('div',{style:{width:'14px',height:'14px',borderRadius:'3px',border:'1.5px solid #9CA3AF'}}),
+                R('span',null,'Link this summary back from the source page.')
+              )
             )
           )
         )
@@ -868,6 +887,7 @@ const CTAScene = `function CTAScene(props){${HELPERS}
   var op=1-sceneOut;
   var btnNudge=Math.sin(f/12)*3;
   return R('div',{style:{width:'100%',height:'100%',background:'#FFFFFF',position:'relative',fontFamily:INTER,opacity:op,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',paddingTop:'80px'}},
+    SectionLabel('Scene 6 · CTA'),
     // Top: eyebrow + tight title + subtitle + button + URL
     R('div',{style:{fontSize:'13px',fontWeight:700,color:'#6B7280',letterSpacing:'3px',marginBottom:'18px',opacity:eyebrowIn}},'ONE SETUP · TWO SURFACES'),
     R('div',{style:{fontSize:'72px',fontWeight:800,color:'#111928',letterSpacing:'-1.8px',textAlign:'center',lineHeight:1.08,maxWidth:'1700px',opacity:titleIn,transform:'translateY('+(10*(1-titleIn))+'px)',whiteSpace:'nowrap'}},
