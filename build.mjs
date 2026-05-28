@@ -14,10 +14,10 @@ const F = {
   install:  { start: 105,  end: 345,  dur: 240 },  // 8s  — sped up from 10s
   arch:     { start: 345,  end: 525,  dur: 180 },  // 6s  — sped up from 7s
   demo:     { start: 525,  end: 795,  dur: 270 },  // 9s
-  flowhunt: { start: 795,  end: 1625, dur: 830 },  // ~27.7s — Phase B trimmed another 40 frames (linear scroll, no kickstart-then-snail)
-  cta:      { start: 1625, end: 1895, dur: 270 },  // 9s
+  flowhunt: { start: 795,  end: 1695, dur: 900 },  // ~30s — Phase B trimmed another 40 frames (linear scroll, no kickstart-then-snail); Phase C extended +70 for Turn 4
+  cta:      { start: 1695, end: 1965, dur: 270 },  // 9s
 };
-const TOTAL_FRAMES = 1895;
+const TOTAL_FRAMES = 1965;
 const TOTAL_SECONDS = TOTAL_FRAMES / FPS;
 
 const HELPERS = `var R=React.createElement;var cl=function(x){return Math.max(0,Math.min(1,x));};var ease=function(t){return 1-Math.pow(1-t,3);};var easeIn=function(t){return t*t*t;};var easeInOut=function(t){return t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;};var easeBack=function(t){var c1=1.70158;var c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2);};var lerp=function(a,b,t){return a+(b-a)*t;};var grad='linear-gradient(90deg,#0084FF,#1A56DB)';var INTER="Inter,system-ui,sans-serif";var MONO='"JetBrains Mono",ui-monospace,Menlo,monospace';var CLAUDE_ICON_URI='${CLAUDE_ICON}';function NotionMark(size,color){return R('svg',{width:size,height:size,viewBox:'0 0 100 100'},R('path',{d:'M16 18 L16 84 L26 84 L26 38 L72 84 L84 84 L84 18 L74 18 L74 64 L26 18 Z',fill:color||'#111928'}));}function BriefcaseIcon(size,color){return R('svg',{width:size,height:size,viewBox:'0 0 24 24',fill:'none'},R('rect',{x:3,y:7,width:18,height:13,rx:2,fill:color||'#A0522D'}),R('path',{d:'M8 7 V5 a2 2 0 0 1 2-2 h4 a2 2 0 0 1 2 2 V7',stroke:color||'#7C3E1A',strokeWidth:1.5,fill:'none'}),R('rect',{x:3,y:11,width:18,height:2,fill:'rgba(0,0,0,0.18)'}));}function SectionLabel(text){return R('div',{style:{position:'absolute',left:'24px',top:'12px',fontSize:'11px',fontWeight:600,color:'#9CA3AF',fontFamily:'"JetBrains Mono",ui-monospace,Menlo,monospace',letterSpacing:'0.4px',opacity:0.55,zIndex:99,pointerEvents:'none'}},text);}function GitHubMark(size){return R('svg',{width:size,height:size,viewBox:'0 0 16 16',fill:'#FFFFFF'},R('path',{d:'M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z'}));}function SlackMark(size){return R('svg',{width:size,height:size,viewBox:'0 0 24 24'},R('rect',{x:2,y:10,width:8,height:4,rx:2,fill:'#36C5F0'}),R('rect',{x:14,y:10,width:8,height:4,rx:2,fill:'#2EB67D'}),R('rect',{x:10,y:2,width:4,height:8,rx:2,fill:'#ECB22E'}),R('rect',{x:10,y:14,width:4,height:8,rx:2,fill:'#E01E5A'}));}function DriveMark(size){return R('svg',{width:size,height:size,viewBox:'0 0 24 24'},R('path',{d:'M7.5 3 L16.5 3 L23 14 L14 14 Z',fill:'#FFD04B'}),R('path',{d:'M7.5 3 L1 14 L5.5 22 L12 11 Z',fill:'#1FA463'}),R('path',{d:'M14 14 L23 14 L18.5 22 L9.5 22 Z',fill:'#3777E3'}));}`;
@@ -363,15 +363,15 @@ const DemoScene = `function DemoScene(props){${HELPERS}
  * ========================================================================== */
 const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
   var f=props.frame||0;
-  var END=830;
+  var END=900;
   var sceneOut=easeIn(cl((f-(END-22))/22));
   var op=1-sceneOut;
   // Phase B trimmed another 40 frames — scroll is now pure linear and finishes by f=240.
   function fade(a,b){var inF=ease(cl((f-a)/22));var outF=easeIn(cl((f-(b-22))/22));return cl(inF-outF);}
   var aOp=fade(0, 90);
   var bOp=fade(90, 270);     // B ends at 270 (was 310)
-  var cOp=fade(270, 800);    // C shifts -40
-  var dOp=fade(530, 830);    // D shifts -40
+  var cOp=fade(270, 870);    // C shifts -40, extended for Turn 4
+  var dOp=fade(530, 880);    // D outlives Phase C so Notion stays visible right up to scene-out
 
   function copyOp(phaseStart, phaseEnd){var inF=ease(cl((f-phaseStart)/18));var outF=easeIn(cl((f-(phaseEnd-18))/18));return cl(inF-outF);}
   var copyA=copyOp(0, 90);
@@ -429,7 +429,7 @@ const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
     // During Phase D the FH browser stays anchored at its left edge but SHRINKS to ~half
     // the canvas (920 px) — mirroring Scene 2's clean side-by-side split. The Notion demo
     // takes the matching half on the right with a 32px gap. No overlap, no off-screen.
-    R('div',{style:{position:'absolute',left:browserX+'px',top:browserY+'px',width:lerp(browserW,920,dPhase)+'px',height:browserH+'px',background:'#FFFFFF',borderRadius:'12px',overflow:'hidden',boxShadow:'0 30px 70px rgba(17,25,40,0.22)',border:'1px solid #D1D5DB'}},
+    R('div',{style:{position:'absolute',left:browserX+'px',top:browserY+'px',width:lerp(browserW,1240,dPhase)+'px',height:browserH+'px',background:'#FFFFFF',borderRadius:'12px',overflow:'hidden',boxShadow:'0 30px 70px rgba(17,25,40,0.22)',border:'1px solid #D1D5DB'}},
       // Chrome chrome bar — traffic lights + tab
       R('div',{style:{height:chromeBarH+'px',background:'#DEE1E6',display:'flex',alignItems:'flex-end',padding:'0 14px',position:'relative'}},
         R('div',{style:{position:'absolute',left:14,top:12,width:12,height:12,borderRadius:'50%',background:'#FF5F57'}}),
@@ -552,7 +552,7 @@ const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
         bOp>0.005?(function(){
           // Pure linear scroll, constant velocity throughout — no kickstart + snail.
           // 100 frames total travel from f=140 to f=240.
-          var scrollT=cl((f-140)/100);
+          var scrollT=cl((f-140)/68);
           var scrollY=-scrollT*640;
           return R('div',{style:{position:'absolute',inset:'0',padding:'0 32px 28px 32px',opacity:bOp}},
             R('div',{style:{background:'#FFFFFF',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'22px 28px',height:'100%',display:'flex',flexDirection:'column'}},
@@ -603,6 +603,10 @@ const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
           var load3=cl(ease(cl((f-610)/12))-easeIn(cl((f-630)/10)));
           var t3In=ease(cl((f-630)/18));
           var r3In=ease(cl((f-675)/16));
+          var u4In=ease(cl((f-720)/14));
+          var load4=cl(ease(cl((f-750)/12))-easeIn(cl((f-770)/10)));
+          var t4In=ease(cl((f-770)/18));
+          var r4In=ease(cl((f-815)/16));
           // No inter-turn scrolling — all three turns are sized/spaced to fit statically in the panel.
           var chatScrollY=0;
           function tilesP(i){return ease(cl((f-(360+i*1.2))/14));}
@@ -752,13 +756,42 @@ const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
                       R('div',null,'  "url":"notion.so/Capability-Demo-Summary"}')
                     )
                   ),
-                  R('div',{style:{opacity:r3In,padding:'10px 12px',background:'#F4F5F7',borderRadius:'10px',color:'#172B4D',fontSize:'11px',lineHeight:1.45}},
+                  R('div',{style:{opacity:r3In,padding:'10px 12px',background:'#F4F5F7',borderRadius:'10px',color:'#172B4D',fontSize:'11px',lineHeight:1.45,marginBottom:'10px'}},
                     R('div',null,'Done — the new page is live in your workspace.'),
                     R('div',{style:{marginTop:'5px',display:'flex',alignItems:'center',gap:'6px',padding:'6px 10px',background:'#FFFFFF',border:'1px solid #DBE7FF',borderRadius:'7px'}},
                       R('div',{style:{width:'16px',height:'16px',borderRadius:'4px',background:'#FFFFFF',border:'1px solid #E5E7EB',display:'flex',alignItems:'center',justifyContent:'center'}},NotionMark(10,'#111928')),
                       R('div',{style:{flex:1,fontSize:'11px',color:'#1A56DB',fontFamily:MONO}},'notion.so/Capability-Demo-Summary'),
                       R('div',{style:{fontSize:'9px',color:'#22C55E',fontWeight:700}},'✓ Created')
                     )
+                  ),
+                  // Turn 4: ask the agent to add a fourth follow-up → notion_append_block_children → reply
+                  R('div',{style:{display:'flex',justifyContent:'flex-end',marginBottom:'10px',opacity:u4In}},
+                    R('div',{style:{padding:'10px 16px',borderRadius:'18px 18px 4px 18px',background:'#0084FF',color:'#FFFFFF',fontSize:'13px',maxWidth:'78%'}},'Add a fourth follow-up: schedule a review meeting.')
+                  ),
+                  R('div',{style:{fontSize:'10px',color:'#6B7280',marginBottom:'6px',opacity:u4In}},'From: AIAgent'),
+                  AILoadingBanner('notion_append_block_children',load4,'l4'),
+                  R('div',{style:{opacity:t4In,padding:'12px 14px',borderRadius:'10px',border:'1px solid #E5E7EB',background:'#FFFFFF',marginBottom:'12px'}},
+                    R('div',{style:{display:'flex',alignItems:'center',gap:'10px',marginBottom:'10px'}},
+                      R('span',{style:{fontSize:'14px'}},'⚙'),
+                      R('div',null,
+                        R('div',{style:{fontSize:'13px',fontWeight:600,color:'#111928'}},'Using ',R('span',{style:{fontFamily:MONO,color:'#0084FF'}},'notion_append_block_children')),
+                        R('div',{style:{fontSize:'10px',color:'#9CA3AF'}},'Append a block to an existing Notion page.')
+                      ),
+                      R('div',{style:{marginLeft:'auto',fontSize:'10px',color:'#9CA3AF'}},'594 ms')
+                    ),
+                    R('div',{style:{padding:'8px 12px',background:'#F9FAFB',borderRadius:'8px',fontFamily:MONO,fontSize:'11px',color:'#111928',lineHeight:1.55,marginBottom:'6px'}},
+                      R('div',{style:{color:'#6B7280',fontSize:'9px',marginBottom:'2px'}},'Input'),
+                      R('div',null,'block_id: "7e22ad64-336e-…"'),
+                      R('div',null,'children: [{ type:"to_do", checked:false,'),
+                      R('div',null,'  rich_text:"Schedule a review meeting" }]')
+                    ),
+                    R('div',{style:{padding:'8px 12px',background:'#0F172A',borderRadius:'8px',fontFamily:MONO,fontSize:'10px',color:'#D1D5DB',lineHeight:1.65}},
+                      R('div',{style:{color:'#94A3B8',fontSize:'9px',marginBottom:'2px'}},'Output'),
+                      R('div',null,'{"object":"list","results":[{...}]}')
+                    )
+                  ),
+                  R('div',{style:{opacity:r4In,padding:'10px 12px',background:'#F4F5F7',borderRadius:'10px',color:'#172B4D',fontSize:'11px',lineHeight:1.45}},
+                    R('div',null,'Done — added the new follow-up to your page.')
                   )
                 )
               )
@@ -778,10 +811,11 @@ const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
       var pageSettle=ease(cl((f-570)/30));
       var checkOn=function(d){return ease(cl((f-(750+d))/16));};
       var r3InLocal=ease(cl((f-675)/16));
+      var r4In=ease(cl((f-815)/16));
       // Notion demo: Scene-2-style side-by-side. FH is now 920 wide at left:80, so its right
       // edge sits at 1000. Notion fits cleanly in the right half with a 32px gap.
-      var nW=896, nH=720;
-      var nX=1000;
+      var nW=560, nH=720;
+      var nX=1360;
       var nY=lerp(1080, 130, slideIn);
       // "Edited X ago" badge — flips from "just now" to "edited a second ago" once r3 lands.
       var editedBadge=r3InLocal>0.5?'edited a second ago':'just now';
@@ -861,6 +895,10 @@ const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
               R('div',{style:{display:'flex',alignItems:'center',gap:'10px'}},
                 R('div',{style:{width:'14px',height:'14px',borderRadius:'3px',border:'1.5px solid #9CA3AF'}}),
                 R('span',null,'Link this summary back from the source page.')
+              ),
+              R('div',{style:{display:'flex',alignItems:'center',gap:'10px',opacity:r4In}},
+                R('div',{style:{width:'14px',height:'14px',borderRadius:'3px',border:'1.5px solid #0084FF',background:r4In>0.5?'#EEF4FF':'transparent'}}),
+                R('span',{style:{color:r4In>0.5?'#0084FF':'#9CA3AF',fontWeight:r4In>0.5?600:400}},'Schedule a review meeting.')
               )
             )
           )
