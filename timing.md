@@ -1,6 +1,6 @@
 # Scene timing — claude-code-notion-mcp
 
-**Total**: 63.5 s · 30 fps · 1905 frames · 1920 × 1080.
+**Total**: 66.5 s · 30 fps · 1995 frames · 1920 × 1080.
 
 Maps each paragraph of `voiceover.md` Part 2 (the flowing read) to the scene it sits over, with the exact absolute frame range. `voiceover.md` Part 1 has the plain-English narrative — read that first to align with the video.
 
@@ -13,8 +13,8 @@ Maps each paragraph of `voiceover.md` Part 2 (the flowing read) to the scene it 
 | 5 | s5a-fh-marketplace  | FlowHunt · Integrations marketplace            | 795–885      | 3.0 s   | *"The same MCP also plugs into FlowHunt."* |
 | 6 | s5b-fh-toolcatalog  | FlowHunt · Tool catalog (scrolling)            | 885–1035     | 5.0 s   | *"All twenty-one Notion tools land in your agent automatically."* |
 | 7 | s5c1-fh-chat1       | FlowHunt · Chat (turns 1–2)                    | 1035–1335    | 10.0 s  | *"Ask the agent what it can do. It enumerates every Notion capability…"* |
-| 8 | s5c2-fh-chat2       | FlowHunt · Chat (turns 3–4) + Notion morph     | 1335–1635    | 10.0 s  | *"Then ask it to build something. The agent creates a summary page…"* |
-| 9 | s6-cta              | CTA                                            | 1635–1905    | 9.0 s   | *"One MCP, one OAuth, two surfaces. The complete walkthrough…"* |
+| 8 | s5c2-fh-chat2       | FlowHunt · Chat (turns 3–4) + Notion morph     | 1335–1725    | 13.0 s  | *"Then ask it to build something. The agent creates a summary page, adds your follow-ups, and you watch the page rewrite itself, line by line."* |
+| 9 | s6-cta              | CTA                                            | 1725–1995    | 9.0 s   | *"One MCP. Two surfaces. The complete guide is on flowhunt dot i-o slash blog."* |
 
 ## Reading cadence
 
