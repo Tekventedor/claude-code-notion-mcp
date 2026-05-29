@@ -390,6 +390,7 @@ const FH_CHROME_HELPERS = `
     var browserH=900;
     var browserX=(1920-browserW)/2;
     if(opts.browserAnchorLeft) browserX=80;
+    if(opts.browserLeft!=null) browserX=opts.browserLeft;
     var browserY=64;
     var eyebrow=opts.eyebrow||'';
     var title=opts.title||'';
@@ -930,7 +931,7 @@ const FHChat2Scene = `function FHChat2Scene(props){${HELPERS}${FH_CHROME_HELPERS
   var fullOp=ease(cl((f-(morphStart+16))/22));   // global fallback opacity for the new tree
   var nW=600, nH=900;
   var nY=64;                                 // fixed at the top of the canvas, aligned with FH
-  var nX=lerp(1920, 1320, slideIn);          // slides in from off-screen-right to its resting spot
+  var nX=lerp(1920, 1280, slideIn);          // slides in from right; rests at 1280 so FH+Notion are canvas-centred (40 left + 1240 + 600 + 40 right)
   var editedBadge=r3In>0.5?'edited a second ago':'just now';
   function checkOn(d){return ease(cl((f-(210+d))/16));}
   var notionPanel=R('div',{style:{position:'absolute',left:nX+'px',top:nY+'px',width:nW+'px',height:nH+'px',background:'#FFFFFF',borderRadius:'12px',overflow:'hidden',boxShadow:'0 40px 80px rgba(17,25,40,0.30)',border:'1px solid #D1D5DB'}},
@@ -1020,7 +1021,9 @@ const FHChat2Scene = `function FHChat2Scene(props){${HELPERS}${FH_CHROME_HELPERS
       eyebrow:'AGENT, RUNNING',
       title:'Run the agent, ask anything, and watch it call Notion live — no terminal required.',
       browserW:browserW,
-      browserAnchorLeft:true,
+      // FH browser shifts left from 80 → 40 as Phase D arrives, so the FH+Notion pair
+      // sits centred on the canvas (40 blank-left, FH 1240, Notion 600, 40 blank-right).
+      browserLeft:lerp(80, 40, dPhase),
       body:body
     }),
     notionPanel
