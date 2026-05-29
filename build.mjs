@@ -908,9 +908,26 @@ const FHChat2Scene = `function FHChat2Scene(props){${HELPERS}${FH_CHROME_HELPERS
   // Notion side panel — slides in from the RIGHT (not from below), no easeBack bounce.
   var slideIn=ease(cl(f/30));
   var pageSettle=ease(cl((f-30)/30));
-  var contentMorph=easeInOut(cl((f-130)/30));
-  var skeletonOp=1-contentMorph;
-  var fullOp=contentMorph;
+  // Rewriting morph — source fades + shifts up, then new page cascades in line by line.
+  var morphStart=130;
+  // OLD: fades out + drifts up + blurs in the first 18 frames
+  var oldFadeOut=ease(cl((f-morphStart)/18));
+  var skeletonOp=1-oldFadeOut;
+  var skeletonShiftY=-12*oldFadeOut;
+  var skeletonBlur=4*oldFadeOut;
+  // NEW: cascades in line-by-line starting at morphStart+16 (slight overlap with old fade)
+  function newLine(d){return ease(cl((f-(morphStart+16+d))/14));}
+  var newTitleOp=newLine(0);
+  var newEditedOp=newLine(6);
+  var newCalloutOp=newLine(12);
+  var newSummaryHdrOp=newLine(18);
+  var newSummaryBodyOp=newLine(24);
+  var newFollowupsHdrOp=newLine(30);
+  var newFollowupsBodyOp=newLine(36);
+  var newBadgeOp=newLine(0);
+  // Overall morph progress (used for things like url + tab text flip — flip at the midpoint)
+  var contentMorph=easeInOut(cl((f-morphStart)/40));
+  var fullOp=ease(cl((f-(morphStart+16))/22));   // global fallback opacity for the new tree
   var nW=600, nH=900;
   var nY=64;                                 // fixed at the top of the canvas, aligned with FH
   var nX=lerp(1920, 1320, slideIn);          // slides in from off-screen-right to its resting spot
@@ -935,10 +952,10 @@ const FHChat2Scene = `function FHChat2Scene(props){${HELPERS}${FH_CHROME_HELPERS
       )
     ),
     R('div',{style:{padding:'36px 48px 28px 48px',position:'relative',transform:'translateY('+(16*(1-pageSettle))+'px)',opacity:pageSettle,minHeight:'480px'}},
-      R('div',{style:{position:'absolute',top:'14px',right:'20px',padding:'4px 10px',background:'#DCFCE7',color:'#15803D',fontSize:'10px',fontWeight:700,borderRadius:'12px',border:'1px solid #86EFAC',display:'flex',alignItems:'center',gap:'5px',opacity:fullOp}},
+      R('div',{style:{position:'absolute',top:'14px',right:'20px',padding:'4px 10px',background:'#DCFCE7',color:'#15803D',fontSize:'10px',fontWeight:700,borderRadius:'12px',border:'1px solid #86EFAC',display:'flex',alignItems:'center',gap:'5px',opacity:newBadgeOp}},
         R('span',null,'✓'),'Created via Notion MCP'
       ),
-      R('div',{style:{position:'absolute',left:'48px',right:'48px',top:'36px',opacity:skeletonOp}},
+      R('div',{style:{position:'absolute',left:'48px',right:'48px',top:'36px',opacity:skeletonOp,transform:'translateY('+skeletonShiftY+'px)',filter:skeletonBlur>0.1?'blur('+skeletonBlur+'px)':'none'}},
         R('div',{style:{fontSize:'30px',fontWeight:800,color:'#111928',letterSpacing:'-0.8px',marginBottom:'20px'}},'Notion AI capability demo draft'),
         R('div',{style:{fontSize:'17px',fontWeight:700,color:'#111928',marginTop:'14px'}},'Quick actions'),
         R('div',{style:{fontSize:'13px',color:'#374151',marginTop:'4px'}},'• Add your assignment list as a checklist with due dates'),
@@ -949,25 +966,27 @@ const FHChat2Scene = `function FHChat2Scene(props){${HELPERS}${FH_CHROME_HELPERS
         R('div',{style:{fontSize:'17px',fontWeight:700,color:'#111928',marginTop:'14px'}},'Slide 2: Output types'),
         R('div',{style:{fontSize:'13px',color:'#374151',marginTop:'4px'}},'Summaries and outlines')
       ),
-      R('div',{style:{position:'absolute',left:'48px',right:'48px',top:'36px',opacity:fullOp}},
-        R('div',{style:{fontSize:'30px',fontWeight:800,color:'#111928',letterSpacing:'-0.8px',marginBottom:'6px'}},'Capability Demo Summary'),
-        R('div',{style:{fontSize:'12px',color:'#9CA3AF',marginBottom:'20px',display:'flex',alignItems:'center',gap:'8px'}},
+      R('div',{style:{position:'absolute',left:'48px',right:'48px',top:'36px'}},
+        // Cascading reveal: each line/section gets its own opacity + slight upward translateY
+        // so the page "writes itself" instead of cross-fading all at once.
+        R('div',{style:{fontSize:'30px',fontWeight:800,color:'#111928',letterSpacing:'-0.8px',marginBottom:'6px',opacity:newTitleOp,transform:'translateY('+(6*(1-newTitleOp))+'px)'}},'Capability Demo Summary'),
+        R('div',{style:{fontSize:'12px',color:'#9CA3AF',marginBottom:'20px',display:'flex',alignItems:'center',gap:'8px',opacity:newEditedOp,transform:'translateY('+(6*(1-newEditedOp))+'px)'}},
           R('span',null,'Created by Using Notion Tool'),
           R('span',{style:{color:'#D1D5DB'}},'·'),
           R('span',{style:{color:r3In>0.5?'#15803D':'#9CA3AF',fontWeight:r3In>0.5?600:400}},editedBadge)
         ),
-        R('div',{style:{padding:'12px 16px',background:'#EEF4FF',border:'1px solid #DBE7FF',borderRadius:'10px',color:'#1A56DB',fontSize:'13px',marginBottom:'20px',display:'flex',alignItems:'center',gap:'10px'}},
+        R('div',{style:{padding:'12px 16px',background:'#EEF4FF',border:'1px solid #DBE7FF',borderRadius:'10px',color:'#1A56DB',fontSize:'13px',marginBottom:'20px',display:'flex',alignItems:'center',gap:'10px',opacity:newCalloutOp,transform:'translateY('+(6*(1-newCalloutOp))+'px)'}},
           R('div',{style:{width:'20px',height:'20px',borderRadius:'5px',background:'#FFFFFF',border:'1px solid #DBE7FF',display:'flex',alignItems:'center',justifyContent:'center'}},NotionMark(12,'#111928')),
           R('div',null,R('span',{style:{fontWeight:700}},'Source: '),'Notion AI capability demo draft')
         ),
-        R('div',{style:{fontSize:'18px',fontWeight:700,color:'#111928',marginBottom:'8px'}},'Summary'),
-        R('div',{style:{fontSize:'13px',color:'#374151',lineHeight:1.65,marginBottom:'18px'}},
+        R('div',{style:{fontSize:'18px',fontWeight:700,color:'#111928',marginBottom:'8px',opacity:newSummaryHdrOp,transform:'translateY('+(6*(1-newSummaryHdrOp))+'px)'}},'Summary'),
+        R('div',{style:{fontSize:'13px',color:'#374151',lineHeight:1.65,marginBottom:'18px',opacity:newSummaryBodyOp,transform:'translateY('+(6*(1-newSummaryBodyOp))+'px)'}},
           R('div',null,'•  Quick actions for ad-hoc checklists and rewrites.'),
           R('div',null,'•  A mini slide deck used in Presentation Mode.'),
           R('div',null,'•  Two example slides covering goal and output types.')
         ),
-        R('div',{style:{fontSize:'18px',fontWeight:700,color:'#111928',marginBottom:'8px'}},'Follow-ups'),
-        R('div',{style:{fontSize:'13px',color:'#374151',lineHeight:1.85}},
+        R('div',{style:{fontSize:'18px',fontWeight:700,color:'#111928',marginBottom:'8px',opacity:newFollowupsHdrOp,transform:'translateY('+(6*(1-newFollowupsHdrOp))+'px)'}},'Follow-ups'),
+        R('div',{style:{fontSize:'13px',color:'#374151',lineHeight:1.85,opacity:newFollowupsBodyOp,transform:'translateY('+(6*(1-newFollowupsBodyOp))+'px)'}},
           R('div',{style:{display:'flex',alignItems:'center',gap:'10px'}},
             R('div',{style:{width:'14px',height:'14px',borderRadius:'3px',border:'1.5px solid #9CA3AF'}}),
             R('span',null,'Pick a real "Quick actions" task to walk through with the agent.')
