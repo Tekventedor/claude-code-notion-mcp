@@ -8,14 +8,18 @@ import { CLAUDE_ICON } from './assets.mjs';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const FPS = 30;
-// Order: Pivot → Install → Arch → Demo → FlowHunt → CTA. Snapshot removed.
+// Order: Pivot → Install → Arch → Demo → FH Marketplace → FH Tool Catalog → FH Chat1 → FH Chat2 → FH Result → CTA.
 const F = {
-  pivot:    { start: 0,    end: 105,  dur: 105 },  // 3.5s
-  install:  { start: 105,  end: 345,  dur: 240 },  // 8s  — sped up from 10s
-  arch:     { start: 345,  end: 525,  dur: 180 },  // 6s  — sped up from 7s
-  demo:     { start: 525,  end: 795,  dur: 270 },  // 9s
-  flowhunt: { start: 795,  end: 1695, dur: 900 },  // ~30s — Phase B trimmed another 40 frames (linear scroll, no kickstart-then-snail); Phase C extended +70 for Turn 4
-  cta:      { start: 1695, end: 1965, dur: 270 },  // 9s
+  pivot:     { start: 0,    end: 105,  dur: 105 },  // 3.5s
+  install:   { start: 105,  end: 345,  dur: 240 },  // 8s
+  arch:      { start: 345,  end: 525,  dur: 180 },  // 6s
+  demo:      { start: 525,  end: 795,  dur: 270 },  // 9s
+  fhMarket:  { start: 795,  end: 885,  dur: 90  },  // 3s   — Phase A integrations marketplace
+  fhCatalog: { start: 885,  end: 1065, dur: 180 },  // 6s   — Phase B tool catalog scroll
+  fhChat1:   { start: 1065, end: 1305, dur: 240 },  // 8s   — Phase C, turns 1 & 2
+  fhChat2:   { start: 1305, end: 1575, dur: 270 },  // 9s   — Phase C turns 3 & 4 + Phase D Notion morph
+  fhResult:  { start: 1575, end: 1695, dur: 120 },  // 4s   — final Notion result page reveal
+  cta:       { start: 1695, end: 1965, dur: 270 },  // 9s
 };
 const TOTAL_FRAMES = 1965;
 const TOTAL_SECONDS = TOTAL_FRAMES / FPS;
@@ -357,94 +361,53 @@ const DemoScene = `function DemoScene(props){${HELPERS}
 }`;
 
 /* ============================================================================
- * SCENE 5 — FlowHunt (figma-style 3-phase store/web-app)
- * A Integrations marketplace · B Notion-only tool grid (scrolls down) · C Canvas with small AI Agent + live result
- * No big pink emoji box. AI Agent is a small fhNode-style card with the Notion mark.
+ * FH chrome — shared Chrome browser window + FlowHunt sidebar + URL bar + page
+ * header, used by all four FH scenes. The fifth FH scene (Result) renders a
+ * Notion browser directly with no FH chrome.
+ *
+ * Opts:
+ *   tabText        - browser tab text (default 'Using Notion Tool · FlowHunt')
+ *   urlPath        - URL bar path text
+ *   activeNav      - sidebar nav item to highlight ('Integrations' | 'My Agents' | ...)
+ *   rightBtnText   - primary header button label ('New agent' | 'Publish Agent' | ...)
+ *   eyebrow        - eyebrow text shown above title (e.g. 'INTEGRATE NOTION')
+ *   title          - page-header title text
+ *   showEditRun    - whether to render the Edit | Run | Batch pill in the page header
+ *   runActive      - when true, Run is highlighted instead of Edit (Phase C)
+ *   browserW       - browser window width (default 1760; chat2 lerps to 1240)
+ *   body           - body content (React element) rendered inside the FH page body
  * ========================================================================== */
-const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
-  var f=props.frame||0;
-  var END=900;
-  var sceneOut=easeIn(cl((f-(END-22))/22));
-  var op=1-sceneOut;
-  // Phase B trimmed another 40 frames — scroll is now pure linear and finishes by f=240.
-  function fade(a,b){var inF=ease(cl((f-a)/22));var outF=easeIn(cl((f-(b-22))/22));return cl(inF-outF);}
-  var aOp=fade(0, 90);
-  var bOp=fade(90, 270);     // B ends at 270 (was 310)
-  var cOp=fade(270, 870);    // C shifts -40, extended for Turn 4
-  var dOp=fade(530, 880);    // D outlives Phase C so Notion stays visible right up to scene-out
-
-  function copyOp(phaseStart, phaseEnd){var inF=ease(cl((f-phaseStart)/18));var outF=easeIn(cl((f-(phaseEnd-18))/18));return cl(inF-outF);}
-  var copyA=copyOp(0, 90);
-  var copyB=copyOp(90, 270);
-  var copyC=copyOp(270, 530);
-  var copyD=copyOp(530, 830);
-
-  // Layout transition: at f<530 chat sits next to the canvas. From f=520 the canvas fades,
-  // and the FH browser shrinks to ~half-width while the Notion demo slides in on the right.
-  var dPhase=ease(cl((f-520)/30));   // 0 → 1 over the transition window
-  var canvasOp=1-dPhase;
-
-  // Browser chrome geometry (matches the canonical pattern from the jira reference)
-  var browserW=1760, browserH=900;
-  var browserX=(1920-browserW)/2;   // 80
-  var browserY=64;
-  var chromeBarH=38;
-  var urlBarH=42;
-  var pageHdrH=54;
-  var bodyTop=browserY+chromeBarH+urlBarH+pageHdrH;
-  var bodyLeft=browserX;
-  var bodyW=browserW;
-  var bodyH=browserH-(chromeBarH+urlBarH+pageHdrH);
-  // URL bar path varies per phase
-  var urlPath=(f<90)?'/integrations':(f<340?'/agents/using-notion-tool/edit':'/agents/using-notion-tool/run');
-
-  // Notion tool list (used in B's scrolling grid)
-  var allTools=['Search Notion','Retrieve Notion Page','Retrieve Notion Block','Retrieve Notion Data Source','Retrieve Notion Comments','Retrieve Notion Page Property','Create Notion Page','Create Notion Comment','Create Notion Data Source','Append Notion Block Children','Update Notion Page','Update Notion Block','Update Notion Data Source','Move Notion Page','Delete Notion Block','Get Notion Block Children','Get Notion Bot User','Get Notion User','List Notion Users','List Notion Data Source Templates','Query Notion Data Source'];
-
-  // figma-style fhNode helper — small card with coloured header bar + port labels
-  function fhNode(opts){
-    var p=opts.opacity;
-    if(p<0.005) return null;
-    return R('div',{key:opts.key||opts.title,style:{position:opts.position||'static',left:opts.x?opts.x+'px':null,top:opts.y?opts.y+'px':null,width:opts.w+'px',background:'#FFFFFF',border:'1px solid #E5E7EB',borderRadius:'10px',boxShadow:'0 8px 22px rgba(17,25,40,0.08)',overflow:'hidden',opacity:p,transform:'scale('+(0.93+0.07*p)+')'}},
-      // Header
-      R('div',{style:{padding:'8px 12px',borderBottom:'1px solid #F3F4F6',background:opts.headerBg||'#F8FAFC',display:'flex',alignItems:'center',gap:'8px'}},
-        opts.icon?opts.icon:R('div',{style:{width:'6px',height:'6px',borderRadius:'2px',background:opts.dot||'#9CA3AF'}}),
-        R('div',{style:{fontSize:'12px',fontWeight:700,color:opts.textColor||'#111928'}},opts.title)
-      ),
-      // Ports
-      R('div',{style:{padding:'8px 0'}}, (opts.ports||[]).map(function(p,i){
-        return R('div',{key:'pt'+i,style:{display:'flex',alignItems:'center',justifyContent:p.side==='r'?'flex-end':'flex-start',padding:'2px 10px',fontSize:'10px',color:'#374151',position:'relative'}},
-          p.side==='l'?R('span',{style:{display:'inline-block',width:'7px',height:'7px',borderRadius:'50%',background:p.color||'#9CA3AF',position:'absolute',left:'-4px'}}):null,
-          R('span',null,p.label),
-          p.side==='r'?R('span',{style:{display:'inline-block',width:'7px',height:'7px',borderRadius:'50%',background:p.color||'#9CA3AF',position:'absolute',right:'-4px'}}):null
-        );
-      }))
-    );
-  }
-
-  return R('div',{style:{width:'100%',height:'100%',background:'#EEF1F4',position:'relative',fontFamily:INTER,opacity:op,overflow:'hidden'}},
-    SectionLabel(f<90?'Scene 5 · Phase A — Marketplace':f<270?'Scene 5 · Phase B — Tool catalog':f<530?'Scene 5 · Phase C — Chat':'Scene 5 · Phase D — Notion result'),
-
-    // ────────────────── Chrome browser window ──────────────────
-    // During Phase D the FH browser stays anchored at its left edge but SHRINKS to ~half
-    // the canvas (920 px) — mirroring Scene 2's clean side-by-side split. The Notion demo
-    // takes the matching half on the right with a 32px gap. No overlap, no off-screen.
-    R('div',{style:{position:'absolute',left:browserX+'px',top:browserY+'px',width:lerp(browserW,1240,dPhase)+'px',height:browserH+'px',background:'#FFFFFF',borderRadius:'12px',overflow:'hidden',boxShadow:'0 30px 70px rgba(17,25,40,0.22)',border:'1px solid #D1D5DB'}},
-      // Chrome chrome bar — traffic lights + tab
-      R('div',{style:{height:chromeBarH+'px',background:'#DEE1E6',display:'flex',alignItems:'flex-end',padding:'0 14px',position:'relative'}},
+const FH_MARK_PATH_LIT = FH_MARK_PATH;
+const FH_CHROME_HELPERS = `
+  var FH_CHROME_BAR_H=38, FH_URL_BAR_H=42, FH_PAGE_HDR_H=54;
+  function FHChrome(opts){
+    var tabText=opts.tabText||'Using Notion Tool · FlowHunt';
+    var urlPath=opts.urlPath||'/agents/using-notion-tool/run';
+    var activeNav=opts.activeNav||'My Agents';
+    var rightBtnText=opts.rightBtnText||'Publish Agent';
+    var showEditRun=opts.showEditRun!==false;
+    var runActive=!!opts.runActive;
+    var browserW=opts.browserW||1760;
+    var browserH=900;
+    var browserX=(1920-browserW)/2;
+    if(opts.browserAnchorLeft) browserX=80;
+    var browserY=64;
+    var eyebrow=opts.eyebrow||'';
+    var title=opts.title||'';
+    return R('div',{style:{position:'absolute',left:browserX+'px',top:browserY+'px',width:browserW+'px',height:browserH+'px',background:'#FFFFFF',borderRadius:'12px',overflow:'hidden',boxShadow:'0 30px 70px rgba(17,25,40,0.22)',border:'1px solid #D1D5DB'}},
+      R('div',{style:{height:FH_CHROME_BAR_H+'px',background:'#DEE1E6',display:'flex',alignItems:'flex-end',padding:'0 14px',position:'relative'}},
         R('div',{style:{position:'absolute',left:14,top:12,width:12,height:12,borderRadius:'50%',background:'#FF5F57'}}),
         R('div',{style:{position:'absolute',left:34,top:12,width:12,height:12,borderRadius:'50%',background:'#FEBC2E'}}),
         R('div',{style:{position:'absolute',left:54,top:12,width:12,height:12,borderRadius:'50%',background:'#28C840'}}),
         R('div',{style:{marginLeft:'90px',height:'30px',padding:'0 16px',background:'#F4F5F7',borderTopLeftRadius:'9px',borderTopRightRadius:'9px',display:'flex',alignItems:'center',gap:'9px',fontSize:'13px',color:'#172B4D',fontWeight:600}},
           R('svg',{width:14,height:11,viewBox:'0 0 275 223'},
-            R('defs',null,R('linearGradient',{id:'fhtab',x1:0,y1:0,x2:1,y2:1},R('stop',{offset:0,stopColor:'#0084FF'}),R('stop',{offset:1,stopColor:'#1A56DB'}))),
-            R('path',{d:'${FH_MARK_PATH}',fill:'url(#fhtab)'})
+            R('defs',null,R('linearGradient',{id:'fhtab_'+(opts.gradId||'a'),x1:0,y1:0,x2:1,y2:1},R('stop',{offset:0,stopColor:'#0084FF'}),R('stop',{offset:1,stopColor:'#1A56DB'}))),
+            R('path',{d:'${FH_MARK_PATH_LIT}',fill:'url(#fhtab_'+(opts.gradId||'a')+')'})
           ),
-          R('span',null,(f<90?'Integrations':'Using Notion Tool')+' · FlowHunt')
+          R('span',null,tabText)
         )
       ),
-      // URL bar
-      R('div',{style:{height:urlBarH+'px',background:'#F4F5F7',borderBottom:'1px solid #DFE1E6',display:'flex',alignItems:'center',padding:'0 16px',gap:'12px'}},
+      R('div',{style:{height:FH_URL_BAR_H+'px',background:'#F4F5F7',borderBottom:'1px solid #DFE1E6',display:'flex',alignItems:'center',padding:'0 16px',gap:'12px'}},
         R('div',{style:{display:'flex',gap:'12px',color:'#9AA0A6',fontSize:'15px'}},
           R('span',null,'←'),R('span',null,'→'),R('span',null,'↻')
         ),
@@ -454,51 +417,43 @@ const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
           R('span',{style:{color:'#6B7280'}},urlPath)
         )
       ),
-      // FlowHunt in-page header — breadcrumb · Edit/Run/Batch pill · History · Publish
-      R('div',{style:{height:pageHdrH+'px',background:'#FFFFFF',borderBottom:'1px solid #E5E7EB',display:'flex',alignItems:'center',padding:'0 22px',gap:'14px',position:'relative'}},
-        R('div',{style:{fontSize:'13px',color:'#6B7280',display:'flex',alignItems:'center',gap:'6px'}},R('span',null,'‹'),R('span',null,'Agents')),
+      R('div',{style:{height:FH_PAGE_HDR_H+'px',background:'#FFFFFF',borderBottom:'1px solid #E5E7EB',display:'flex',alignItems:'center',padding:'0 22px',gap:'14px',position:'relative'}},
+        R('div',{style:{fontSize:'13px',color:'#6B7280',display:'flex',alignItems:'center',gap:'6px'}},R('span',null,'‹'),R('span',null,activeNav==='Integrations'?'Integrations':'Agents')),
         R('div',{style:{display:'flex',alignItems:'center',gap:'6px',fontSize:'13px',color:'#111928',fontWeight:700}},
-          R('span',null,f<90?'Integrations':'Using Notion Tool'),
-          f>=90?R('span',{style:{color:'#9CA3AF',fontWeight:500}},'▾'):null
+          R('span',null,activeNav==='Integrations'?'Integrations':'Using Notion Tool'),
+          activeNav!=='Integrations'?R('span',{style:{color:'#9CA3AF',fontWeight:500}},'▾'):null
         ),
-        // Centre: Edit | Run | Batch toggle (Run active during Phase C, Edit otherwise)
-        f>=90?R('div',{style:{position:'absolute',left:'50%',transform:'translateX(-50%)',display:'flex',alignItems:'center',padding:'3px',background:'#F4F5F7',border:'1px solid #E5E7EB',borderRadius:'999px',gap:'2px',fontSize:'13px',fontWeight:600}},
-          R('div',{style:{padding:'5px 18px',background:(f<340?'#111928':'transparent'),color:(f<340?'#FFFFFF':'#6B7280'),borderRadius:'999px',display:'flex',alignItems:'center',gap:'6px'}},R('span',{style:{fontSize:'11px'}},'✎'),'Edit'),
-          R('div',{style:{padding:'5px 18px',background:(f>=310?'#111928':'transparent'),color:(f>=310?'#FFFFFF':'#6B7280'),borderRadius:'999px',display:'flex',alignItems:'center',gap:'6px'}},R('span',{style:{fontSize:'10px'}},'▶'),'Run'),
+        showEditRun?R('div',{style:{position:'absolute',left:'50%',transform:'translateX(-50%)',display:'flex',alignItems:'center',padding:'3px',background:'#F4F5F7',border:'1px solid #E5E7EB',borderRadius:'999px',gap:'2px',fontSize:'13px',fontWeight:600}},
+          R('div',{style:{padding:'5px 18px',background:(runActive?'transparent':'#111928'),color:(runActive?'#6B7280':'#FFFFFF'),borderRadius:'999px',display:'flex',alignItems:'center',gap:'6px'}},R('span',{style:{fontSize:'11px'}},'✎'),'Edit'),
+          R('div',{style:{padding:'5px 18px',background:(runActive?'#111928':'transparent'),color:(runActive?'#FFFFFF':'#6B7280'),borderRadius:'999px',display:'flex',alignItems:'center',gap:'6px'}},R('span',{style:{fontSize:'10px'}},'▶'),'Run'),
           R('div',{style:{padding:'5px 18px',color:'#6B7280',display:'flex',alignItems:'center',gap:'6px'}},R('span',{style:{fontSize:'11px'}},'☰'),'Batch')
         ):null,
-        // Right: History + Publish
         R('div',{style:{marginLeft:'auto',display:'flex',alignItems:'center',gap:'14px',fontSize:'12px',color:'#6B7280'}},
           R('div',{style:{display:'flex',alignItems:'center',gap:'6px',padding:'5px 11px',background:'#F4F5F7',borderRadius:'14px',fontWeight:600}},R('span',{style:{fontSize:'11px'}},'⏱'),R('span',null,'History')),
-          R('div',{style:{padding:'7px 16px',background:grad,color:'#FFFFFF',borderRadius:'8px',fontSize:'13px',fontWeight:700,boxShadow:'0 4px 10px rgba(0,82,204,0.25)'}},f<90?'New agent':(f<340?'Add to my agents':'Publish Agent'))
+          R('div',{style:{padding:'7px 16px',background:grad,color:'#FFFFFF',borderRadius:'8px',fontSize:'13px',fontWeight:700,boxShadow:'0 4px 10px rgba(0,82,204,0.25)'}},rightBtnText)
         )
       ),
-
-      // FlowHunt sidebar — persistent across all phases, sits on the left of the browser body
-      R('div',{style:{position:'absolute',left:0,top:(chromeBarH+urlBarH+pageHdrH)+'px',bottom:0,width:'220px',background:'#FFFFFF',borderRight:'1px solid #E5E7EB',padding:'18px 14px',display:'flex',flexDirection:'column',gap:'4px',overflow:'hidden'}},
-        // Top: FlowHunt mark + wordmark
+      // FlowHunt sidebar
+      R('div',{style:{position:'absolute',left:0,top:(FH_CHROME_BAR_H+FH_URL_BAR_H+FH_PAGE_HDR_H)+'px',bottom:0,width:'220px',background:'#FFFFFF',borderRight:'1px solid #E5E7EB',padding:'18px 14px',display:'flex',flexDirection:'column',gap:'4px',overflow:'hidden'}},
         R('div',{style:{display:'flex',alignItems:'center',gap:'8px',marginBottom:'14px'}},
           R('svg',{width:22,height:18,viewBox:'0 0 275 223'},
-            R('defs',null,R('linearGradient',{id:'fhsb',x1:0,y1:0,x2:1,y2:1},R('stop',{offset:0,stopColor:'#0084FF'}),R('stop',{offset:1,stopColor:'#1A56DB'}))),
-            R('path',{d:'${FH_MARK_PATH}',fill:'url(#fhsb)'})
+            R('defs',null,R('linearGradient',{id:'fhsb_'+(opts.gradId||'a'),x1:0,y1:0,x2:1,y2:1},R('stop',{offset:0,stopColor:'#0084FF'}),R('stop',{offset:1,stopColor:'#1A56DB'}))),
+            R('path',{d:'${FH_MARK_PATH_LIT}',fill:'url(#fhsb_'+(opts.gradId||'a')+')'})
           ),
           R('span',{style:{fontSize:'15px',fontWeight:800,color:'#111928'}},'FlowHunt')
         ),
-        // Workspace block
         R('div',{style:{padding:'10px 10px',background:'#F9FAFB',border:'1px solid #E5E7EB',borderRadius:'8px',marginBottom:'14px'}},
           R('div',{style:{fontSize:'12px',fontWeight:700,color:'#111928'}},'Your Workspace'),
           R('div',{style:{fontSize:'10px',color:'#6B7280',marginTop:'2px'}},'Free Plan')
         ),
-        // AGENT section
         R('div',{style:{fontSize:'10px',color:'#9CA3AF',fontWeight:700,padding:'0 6px 4px 6px',letterSpacing:'0.6px'}},'AGENT'),
         ['Home','Agents Library','My Agents','MCP Servers','Chatbots','History','Integrations'].map(function(label,i){
-          var active=(label==='Integrations' && f<90) || (label==='My Agents' && f>=90);
+          var active=(label===activeNav);
           return R('div',{key:'a'+i,style:{display:'flex',alignItems:'center',gap:'7px',padding:'6px 8px',borderRadius:'6px',background:active?'#EEF4FF':'transparent',fontSize:'12px',color:active?'#1A56DB':'#374151',fontWeight:active?600:500}},
             R('span',{style:{width:'12px',display:'inline-block',textAlign:'center',opacity:0.7}},'◧'),
             label
           );
         }),
-        // KNOWLEDGE section
         R('div',{style:{fontSize:'10px',color:'#9CA3AF',fontWeight:700,padding:'10px 6px 4px 6px',letterSpacing:'0.6px'}},'KNOWLEDGE'),
         ['Schedules','Documents','Memory','Categories'].map(function(label,i){
           return R('div',{key:'k'+i,style:{display:'flex',alignItems:'center',gap:'7px',padding:'6px 8px',borderRadius:'6px',fontSize:'12px',color:'#374151',fontWeight:500}},
@@ -507,409 +462,575 @@ const FlowHuntScene = `function FlowHuntScene(props){${HELPERS}
           );
         })
       ),
-
-      // Phase eyebrow + title (rendered inside the browser body, so it lives on the FlowHunt page)
+      // Eyebrow + title row
       R('div',{style:{padding:'18px 32px 0 252px',background:'#F9FAFB'}},
         R('div',{style:{position:'relative',height:'56px'}},
-          R('div',{style:{position:'absolute',top:0,fontSize:'12px',fontWeight:700,color:'#6B7280',letterSpacing:'2.4px',opacity:copyA}},'INTEGRATE NOTION'),
-          R('div',{style:{position:'absolute',top:0,fontSize:'12px',fontWeight:700,color:'#6B7280',letterSpacing:'2.4px',opacity:copyB}},'EVERY NOTION TOOL'),
-          R('div',{style:{position:'absolute',top:0,fontSize:'12px',fontWeight:700,color:'#6B7280',letterSpacing:'2.4px',opacity:copyC}},'AGENT, RUNNING'),
-          R('div',{style:{position:'absolute',top:'22px',fontSize:'26px',fontWeight:800,color:'#111928',letterSpacing:'-0.3px',opacity:copyA}},'Add Notion the same way you added Claude Code — two clicks in your browser.'),
-          R('div',{style:{position:'absolute',top:'22px',fontSize:'26px',fontWeight:800,color:'#111928',letterSpacing:'-0.3px',opacity:copyB}},'All twenty-one Notion tools are picked up automatically, ready for any agent you build.'),
-          R('div',{style:{position:'absolute',top:'22px',fontSize:'26px',fontWeight:800,color:'#111928',letterSpacing:'-0.3px',opacity:copyC}},'Run the agent, ask anything, and watch it call Notion live — no terminal required.')
+          R('div',{style:{position:'absolute',top:0,fontSize:'12px',fontWeight:700,color:'#6B7280',letterSpacing:'2.4px'}},eyebrow),
+          R('div',{style:{position:'absolute',top:'22px',fontSize:'26px',fontWeight:800,color:'#111928',letterSpacing:'-0.3px'}},title)
         )
       ),
-
-      // ── Body area where the per-phase content renders (sits to the right of the sidebar)
-      R('div',{style:{position:'absolute',left:'220px',top:(chromeBarH+urlBarH+pageHdrH+78)+'px',right:0,bottom:0,background:'#F9FAFB',padding:'0 32px 28px 32px',overflow:'hidden'}},
-
-        // ─────────── PHASE A — Integrations marketplace ───────────
-        aOp>0.005?R('div',{style:{position:'relative',opacity:aOp}},
-          R('div',{style:{display:'flex',gap:'12px',marginBottom:'24px'}},
-            R('div',{style:{width:'320px',height:'40px',borderRadius:'8px',border:'1px solid #E5E7EB',display:'flex',alignItems:'center',padding:'0 14px',fontSize:'14px',color:'#111928',background:'#FFFFFF'}},R('span',{style:{color:'#9CA3AF',marginRight:'10px'}},'⌕'),'notion'),
-            R('div',{style:{width:'120px',height:'40px',borderRadius:'8px',border:'1px solid #E5E7EB',display:'flex',alignItems:'center',padding:'0 14px',fontSize:'14px',color:'#374151',background:'#FFFFFF'}},'Category  ▾')
-          ),
-          R('div',{style:{display:'grid',gridTemplateColumns:'repeat(4, 1fr)',gap:'18px'}},
-            R('div',{key:'n',style:{padding:'22px',borderRadius:'14px',border:'2px solid #0084FF',background:'#F8FBFF'}},
-              R('div',{style:{width:'48px',height:'48px',borderRadius:'10px',background:'#111928',display:'flex',alignItems:'center',justifyContent:'center',marginBottom:'14px'}},NotionMark(28,'#FFFFFF')),
-              R('div',{style:{fontSize:'18px',fontWeight:700,color:'#111928',marginBottom:'6px'}},'Notion'),
-              R('div',{style:{fontSize:'12px',color:'#6B7280',lineHeight:1.45,marginBottom:'14px'}},'Pages & databases'),
-              R('div',{style:{height:'36px',borderRadius:'8px',background:grad,color:'#FFFFFF',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'13px',fontWeight:600,boxShadow:f>=60?'0 0 18px rgba(0,132,255,0.45)':'none'}},'Integrate')
-            ),
-            [{n:'Slack',bg:'#FFFFFF',mark:SlackMark(28),sub:'Send messages'},{n:'GitHub',bg:'#0F172A',mark:GitHubMark(28),sub:'Repos & PRs'},{n:'Google Drive',bg:'#FFFFFF',mark:DriveMark(28),sub:'Files & docs'}].map(function(it,i){
-              var p=ease(cl((f-(30+i*8))/22));
-              return R('div',{key:'g'+i,style:{padding:'22px',borderRadius:'14px',border:'1px solid #E5E7EB',background:'#FFFFFF',opacity:p,transform:'translateY('+(8*(1-p))+'px)'}},
-                R('div',{style:{width:'48px',height:'48px',borderRadius:'10px',background:it.bg,border:it.bg==='#FFFFFF'?'1px solid #E5E7EB':'none',display:'flex',alignItems:'center',justifyContent:'center',marginBottom:'14px'}},it.mark),
-                R('div',{style:{fontSize:'18px',fontWeight:700,color:'#111928',marginBottom:'6px'}},it.n),
-                R('div',{style:{fontSize:'12px',color:'#6B7280',lineHeight:1.45,marginBottom:'14px'}},it.sub),
-                R('div',{style:{height:'36px',borderRadius:'8px',border:'1px solid #E5E7EB',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'13px',fontWeight:600,color:'#374151'}},'Integrate')
-              );
-            })
-          )
-        ):null,
-
-        // ─────────── PHASE B — Tool catalog: 2 columns, constant-velocity scroll ───────────
-        bOp>0.005?(function(){
-          // Pure linear scroll, constant velocity throughout — no kickstart + snail.
-          // 100 frames total travel from f=140 to f=240.
-          var scrollT=cl((f-140)/68);
-          var scrollY=-scrollT*640;
-          return R('div',{style:{position:'absolute',inset:'0',padding:'0 32px 28px 32px',opacity:bOp}},
-            R('div',{style:{background:'#FFFFFF',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'22px 28px',height:'100%',display:'flex',flexDirection:'column'}},
-              R('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'14px'}},
-                R('div',{style:{fontSize:'17px',fontWeight:700,color:'#111928'}},'Select a Tool'),
-                R('div',{style:{display:'flex',alignItems:'center',gap:'10px',fontSize:'12px',color:'#6B7280'}},
-                  R('div',{style:{padding:'5px 10px',borderRadius:'6px',background:'#EEF4FF',color:'#1A56DB',fontWeight:600}},'notion'),
-                  R('div',null,allTools.length+' tools')
-                )
-              ),
-              R('div',{style:{position:'relative',flex:1,overflow:'hidden',borderTop:'1px solid #F3F4F6'}},
-                R('div',{style:{position:'absolute',top:0,left:0,right:'18px',padding:'14px 0',transform:'translateY('+scrollY+'px)'}},
-                  R('div',{style:{display:'grid',gridTemplateColumns:'repeat(2, 1fr)',gap:'14px'}},
-                    allTools.map(function(t,i){
-                      return R('div',{key:i,style:{padding:'18px 20px',borderRadius:'12px',border:'1px solid #E5E7EB',background:'#FFFFFF'}},
-                        R('div',{style:{display:'flex',alignItems:'center',gap:'10px',marginBottom:'10px'}},
-                          R('div',{style:{width:'30px',height:'30px',borderRadius:'7px',background:'#FFFFFF',border:'1px solid #E5E7EB',display:'flex',alignItems:'center',justifyContent:'center'}},NotionMark(18,'#111928')),
-                          R('div',{style:{padding:'3px 8px',borderRadius:'8px',background:'#F3F4F6',fontSize:'11px',color:'#6B7280',fontWeight:600}},'notion')
-                        ),
-                        R('div',{style:{fontSize:'15px',fontWeight:700,color:'#111928'}},t)
-                      );
-                    })
-                  )
-                ),
-                R('div',{style:{position:'absolute',right:'4px',top:'12px',bottom:'12px',width:'4px',borderRadius:'2px',background:'#F3F4F6'}}),
-                R('div',{style:{position:'absolute',right:'4px',top:(12+scrollT*340)+'px',width:'4px',height:'92px',borderRadius:'2px',background:grad}})
-              )
-            )
-          );
-        })():null,
-
-        // ─────────── PHASE C — Canvas + multi-turn chat with loading dots ───────────
-        // Phase C runs frames 340 → 870 (overlaps Phase D from 600). Three turns paced so
-        // each Q is readable, a loading-dots animation runs while the agent "thinks", then
-        // the response lands. The AI Agent canvas fades around f=590 to make room for the
-        // Notion-tab reveal on the right.
-        cOp>0.005?(function(){
-          // Phase C timings shifted another -40 frames (-70 from v8 baseline).
-          var canvasIn=ease(cl((f-282)/22));
-          var u1In=ease(cl((f-290)/14));
-          var load1=cl(ease(cl((f-335)/12))-easeIn(cl((f-385)/10)));
-          var r1In=ease(cl((f-390)/16));
-          var u2In=ease(cl((f-440)/14));
-          var load2=cl(ease(cl((f-470)/12))-easeIn(cl((f-495)/10)));
-          var t2In=ease(cl((f-495)/18));
-          var r2In=ease(cl((f-535)/16));
-          var u3In=ease(cl((f-580)/14));
-          var load3=cl(ease(cl((f-610)/12))-easeIn(cl((f-630)/10)));
-          var t3In=ease(cl((f-630)/18));
-          var r3In=ease(cl((f-675)/16));
-          var u4In=ease(cl((f-720)/14));
-          var load4=cl(ease(cl((f-750)/12))-easeIn(cl((f-770)/10)));
-          var t4In=ease(cl((f-770)/18));
-          var r4In=ease(cl((f-815)/16));
-          // No inter-turn scrolling — all three turns are sized/spaced to fit statically in the panel.
-          var chatScrollY=0;
-          function tilesP(i){return ease(cl((f-(360+i*1.2))/14));}
-          // Loading dots — three bouncing dots, used between Q and R when no tool is called (Turn 1).
-          function LoadingDots(opacity, key){
-            if(opacity<0.05) return null;
-            var t=f*0.35;
-            var d1=0.4+0.6*(Math.sin(t)*0.5+0.5);
-            var d2=0.4+0.6*(Math.sin(t+0.55)*0.5+0.5);
-            var d3=0.4+0.6*(Math.sin(t+1.1)*0.5+0.5);
-            return R('div',{key:key,style:{display:'flex',alignItems:'center',gap:'5px',padding:'10px 14px',borderRadius:'12px',background:'#F4F5F7',width:'fit-content',marginBottom:'10px',opacity:opacity}},
-              R('div',{style:{width:'7px',height:'7px',borderRadius:'50%',background:'#6B7280',opacity:d1,transform:'scale('+(0.7+0.3*d1)+')'}}),
-              R('div',{style:{width:'7px',height:'7px',borderRadius:'50%',background:'#6B7280',opacity:d2,transform:'scale('+(0.7+0.3*d2)+')'}}),
-              R('div',{style:{width:'7px',height:'7px',borderRadius:'50%',background:'#6B7280',opacity:d3,transform:'scale('+(0.7+0.3*d3)+')'}})
-            );
-          }
-          // AI Agent loading banner — pulsing blue circle + "Using <tool_name>" label.
-          // Used between Q and the tool-call widget on Turns 2 & 3 (where a tool is invoked).
-          function AILoadingBanner(toolName, opacity, key){
-            if(opacity<0.05) return null;
-            var pulse=Math.sin(f*0.32)*0.5+0.5;
-            return R('div',{key:key,style:{padding:'8px 14px',borderRadius:'10px',background:'#FFFFFF',border:'1px solid #DBE7FF',display:'flex',alignItems:'center',gap:'10px',width:'fit-content',marginBottom:'10px',opacity:opacity}},
-              R('div',{style:{width:'12px',height:'12px',borderRadius:'50%',background:'#0084FF',opacity:0.4+0.6*pulse,boxShadow:'0 0 '+(6+8*pulse)+'px rgba(0,132,255,0.55)'}}),
-              R('div',{style:{fontSize:'12px',color:'#6B7280'}},'Using ',R('span',{style:{fontFamily:MONO,fontWeight:600,color:'#0084FF'}},toolName))
-            );
-          }
-          // During Phase D the canvas fades and the chat shrinks to make room for the Notion tab.
-          var canvasFlex=lerp(540, 0, dPhase);
-          var canvasPad=lerp(0, 0, dPhase);
-          var canvasContentOp=canvasIn*canvasOp;
-          var chatMaxW=lerp(960, 540, dPhase);
-          return R('div',{style:{position:'absolute',inset:'0',padding:'0 32px 28px 32px',opacity:cOp,display:'flex',gap:'18px'}},
-
-            // ── LEFT: Canvas — fades out when Phase D arrives so the chat can shrink-and-shift
-            R('div',{style:{flex:'0 0 '+canvasFlex+'px',background:'#FFFFFF',borderRadius:'12px',border:'1px solid #E5E7EB',overflow:'hidden',display:'flex',flexDirection:'column',opacity:canvasContentOp}},
-              R('div',{style:{flex:1,position:'relative',backgroundImage:'radial-gradient(#D1D5DB 1px, transparent 1px)',backgroundSize:'20px 20px',padding:'30px 20px',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'2px'}},
-                R('div',{style:{width:'180px',height:'62px',borderRadius:'12px',background:'#10B981',display:'flex',flexDirection:'column',justifyContent:'space-between',padding:'10px 14px',boxShadow:'0 8px 20px rgba(16,185,129,0.30)'}},
-                  R('div',{style:{display:'flex',alignItems:'center',gap:'7px'}},R('span',{style:{display:'inline-block',width:'11px',height:'11px',borderRadius:'3px',background:'rgba(255,255,255,0.45)'}}),R('span',{style:{color:'#FFFFFF',fontSize:'13px',fontWeight:700}},'Chat Input')),
-                  R('div',{style:{alignSelf:'flex-end',display:'flex',alignItems:'center',gap:'4px',color:'#FFFFFF',fontSize:'10px',opacity:0.9}},'Message',R('span',{style:{display:'inline-block',width:'6px',height:'6px',borderRadius:'50%',background:'#FFFFFF'}}))
-                ),
-                R('div',{style:{width:'2px',height:'10px',background:'#94A3B8'}}),
-                R('div',{style:{width:'22px',height:'22px',borderRadius:'50%',background:'#FFFFFF',border:'1.5px solid #0084FF',display:'flex',alignItems:'center',justifyContent:'center',color:'#0084FF',fontSize:'13px',fontWeight:700}},'+'),
-                R('div',{style:{width:'2px',height:'10px',background:'#94A3B8'}}),
-                R('div',{style:{width:'460px',borderRadius:'14px',background:'#FFFFFF',border:'2px dashed #F472B6',padding:'14px 18px',boxShadow:'0 10px 26px rgba(244,114,182,0.15)'}},
-                  R('div',{style:{display:'flex',alignItems:'center',gap:'10px',marginBottom:'12px'}},
-                    R('div',{style:{display:'flex',alignItems:'center',gap:'8px',padding:'4px 10px',borderRadius:'8px',background:'#FCE7F3'}},
-                      R('span',{style:{display:'inline-block',width:'10px',height:'10px',borderRadius:'2px',background:'#F472B6'}}),
-                      R('span',{style:{fontSize:'13px',fontWeight:700,color:'#BE185D'}},'AI Agent')
-                    ),
-                    R('div',{style:{marginLeft:'auto',fontSize:'10px',color:'#9CA3AF',fontWeight:600,letterSpacing:'0.5px'}},'21 TOOLS')
-                  ),
-                  R('div',{style:{display:'flex',flexWrap:'wrap',gap:'5px'}},
-                    [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].map(function(i){
-                      var p=tilesP(i);
-                      return R('div',{key:i,style:{width:'20px',height:'20px',borderRadius:'5px',background:'#111928',display:'flex',alignItems:'center',justifyContent:'center',opacity:p,transform:'scale('+(0.6+0.4*p)+')'}},NotionMark(12,'#FFFFFF'));
-                    })
-                  )
-                ),
-                R('div',{style:{width:'2px',height:'10px',background:'#94A3B8'}}),
-                R('div',{style:{width:'22px',height:'22px',borderRadius:'50%',background:'#FFFFFF',border:'1.5px solid #0084FF',display:'flex',alignItems:'center',justifyContent:'center',color:'#0084FF',fontSize:'13px',fontWeight:700}},'+'),
-                R('div',{style:{width:'2px',height:'10px',background:'#94A3B8'}}),
-                R('div',{style:{width:'160px',height:'52px',borderRadius:'12px',background:'#F87171',display:'flex',flexDirection:'column',justifyContent:'space-between',padding:'8px 14px',boxShadow:'0 8px 20px rgba(248,113,113,0.30)'}},
-                  R('div',{style:{display:'flex',alignItems:'center',gap:'7px'}},R('span',{style:{display:'inline-block',width:'10px',height:'10px',borderRadius:'3px',background:'rgba(255,255,255,0.45)'}}),R('span',{style:{color:'#FFFFFF',fontSize:'12px',fontWeight:700}},'Chat Output')),
-                  R('div',{style:{alignSelf:'flex-start',display:'flex',alignItems:'center',gap:'4px',color:'#FFFFFF',fontSize:'10px',opacity:0.9}},R('span',{style:{display:'inline-block',width:'6px',height:'6px',borderRadius:'50%',background:'#FFFFFF'}}),'Message')
-                )
-              )
-            ),
-
-            // ── RIGHT: scrolling multi-turn chat
-            R('div',{style:{flex:1,background:'#FFFFFF',borderRadius:'12px',border:'1px solid #E5E7EB',overflow:'hidden',display:'flex',flexDirection:'column'}},
-              R('div',{style:{padding:'12px 22px',borderBottom:'1px solid #F3F4F6',display:'flex',alignItems:'center',gap:'10px',background:'#F9FAFB'}},
-                R('div',{style:{width:'26px',height:'26px',borderRadius:'7px',background:'#FFFFFF',border:'1px solid #E5E7EB',display:'flex',alignItems:'center',justifyContent:'center'}},NotionMark(16,'#111928')),
-                R('div',{style:{fontSize:'14px',fontWeight:700,color:'#111928'}},'Using Notion Tool'),
-                R('div',{style:{marginLeft:'auto',display:'flex',alignItems:'center',gap:'5px',fontSize:'11px',color:'#22C55E',fontWeight:700}},R('span',{style:{display:'inline-block',width:'7px',height:'7px',borderRadius:'50%',background:'#22C55E'}}),'Live')
-              ),
-              R('div',{style:{flex:1,position:'relative',overflow:'hidden'}},
-                R('div',{style:{position:'absolute',left:0,right:0,top:0,padding:'18px 22px',transform:'translateY('+chatScrollY+'px)'}},
-                  // Turn 1: user prompt + loading dots while agent "thinks" + structured agent reply
-                  R('div',{style:{display:'flex',justifyContent:'flex-end',marginBottom:'10px',opacity:u1In}},
-                    R('div',{style:{padding:'10px 16px',borderRadius:'18px 18px 4px 18px',background:'#0084FF',color:'#FFFFFF',fontSize:'13px',maxWidth:'78%'}},'Explain what you can do with all your Notion tools.')
-                  ),
-                  LoadingDots(load1,'l1'),
-                  R('div',{style:{opacity:r1In,padding:'10px 12px',background:'#F4F5F7',borderRadius:'10px',color:'#172B4D',fontSize:'11px',lineHeight:1.45,marginBottom:'10px'}},
-                    R('div',{style:{fontWeight:700,fontSize:'12px',marginBottom:'4px'}},'Here\\'s what I can do for you in Notion:'),
-                    R('div',null,R('span',{style:{fontWeight:700,color:'#111928'}},'1) Find things'),' — semantic search (',R('span',{style:{fontFamily:MONO,color:'#0084FF'}},'notion_search'),').'),
-                    R('div',null,R('span',{style:{fontWeight:700,color:'#111928'}},'2) Read content'),' — page bodies, blocks, properties.'),
-                    R('div',null,R('span',{style:{fontWeight:700,color:'#111928'}},'3) Query databases'),' — filter and sort with structured queries.'),
-                    R('div',null,R('span',{style:{fontWeight:700,color:'#111928'}},'4) Create new content'),' — pages, databases, comments, blocks.'),
-                    R('div',null,R('span',{style:{fontWeight:700,color:'#111928'}},'5) Edit & organise'),' — update, move, archive.')
-                  ),
-                  // Turn 2: a real follow-up the user actually asked
-                  R('div',{style:{display:'flex',justifyContent:'flex-end',marginBottom:'10px',opacity:u2In}},
-                    R('div',{style:{padding:'10px 16px',borderRadius:'18px 18px 4px 18px',background:'#0084FF',color:'#FFFFFF',fontSize:'13px',maxWidth:'78%'}},'Can you find a page called "Notion AI capability demo draft"?')
-                  ),
-                  R('div',{style:{fontSize:'10px',color:'#6B7280',marginBottom:'6px',opacity:u2In}},'From: AIAgent'),
-                  AILoadingBanner('notion_search',load2,'l2'),
-                  R('div',{style:{opacity:t2In,padding:'12px 14px',borderRadius:'10px',border:'1px solid #E5E7EB',background:'#FFFFFF',marginBottom:'12px'}},
-                    R('div',{style:{display:'flex',alignItems:'center',gap:'10px',marginBottom:'10px'}},
-                      R('span',{style:{fontSize:'14px'}},'⚙'),
-                      R('div',null,
-                        R('div',{style:{fontSize:'13px',fontWeight:600,color:'#111928'}},'Using ',R('span',{style:{fontFamily:MONO,color:'#0084FF'}},'notion_search')),
-                        R('div',{style:{fontSize:'10px',color:'#9CA3AF'}},'Search for pages and databases by title in Notion.')
-                      ),
-                      R('div',{style:{marginLeft:'auto',fontSize:'10px',color:'#9CA3AF'}},'1103 ms')
-                    ),
-                    R('div',{style:{padding:'8px 12px',background:'#F9FAFB',borderRadius:'8px',fontFamily:MONO,fontSize:'11px',color:'#111928',lineHeight:1.55,marginBottom:'6px'}},
-                      R('div',{style:{color:'#6B7280',fontSize:'9px',marginBottom:'2px'}},'Input'),
-                      R('div',null,'query: "Notion AI capability demo draft"'),
-                      R('div',null,'filter_type: page')
-                    ),
-                    R('div',{style:{padding:'8px 12px',background:'#0F172A',borderRadius:'8px',fontFamily:MONO,fontSize:'10px',color:'#D1D5DB',lineHeight:1.65}},
-                      R('div',{style:{color:'#94A3B8',fontSize:'9px',marginBottom:'2px'}},'Output'),
-                      R('div',null,'[{"object":"page","id":"36d0ad64-336e-80c1-…",'),
-                      R('div',null,'  "title":"Notion AI capability demo draft",'),
-                      R('div',null,'  "url":"notion.so/Notion-AI-capability-…"}]')
-                    )
-                  ),
-                  R('div',{style:{opacity:r2In,padding:'10px 12px',background:'#F4F5F7',borderRadius:'10px',color:'#172B4D',fontSize:'11px',lineHeight:1.45,marginBottom:'10px'}},
-                    R('div',null,'Yes — I can see it.'),
-                    R('div',null,R('span',{style:{fontWeight:700,color:'#111928'}},'Page:'),' Notion AI capability demo draft'),
-                    R('div',null,R('span',{style:{fontWeight:700,color:'#111928'}},'Last edited:'),' 2026-05-27 18:41')
-                  ),
-                  // Turn 3: ask the agent to create a summary page → notion_create_pages tool call → reply with the resulting URL
-                  R('div',{style:{display:'flex',justifyContent:'flex-end',marginBottom:'10px',opacity:u3In}},
-                    R('div',{style:{padding:'10px 16px',borderRadius:'18px 18px 4px 18px',background:'#0084FF',color:'#FFFFFF',fontSize:'13px',maxWidth:'78%'}},'Create a summary page under the same parent.')
-                  ),
-                  R('div',{style:{fontSize:'10px',color:'#6B7280',marginBottom:'6px',opacity:u3In}},'From: AIAgent'),
-                  AILoadingBanner('notion_create_pages',load3,'l3'),
-                  R('div',{style:{opacity:t3In,padding:'12px 14px',borderRadius:'10px',border:'1px solid #E5E7EB',background:'#FFFFFF',marginBottom:'12px'}},
-                    R('div',{style:{display:'flex',alignItems:'center',gap:'10px',marginBottom:'10px'}},
-                      R('span',{style:{fontSize:'14px'}},'⚙'),
-                      R('div',null,
-                        R('div',{style:{fontSize:'13px',fontWeight:600,color:'#111928'}},'Using ',R('span',{style:{fontFamily:MONO,color:'#0084FF'}},'notion_create_pages')),
-                        R('div',{style:{fontSize:'10px',color:'#9CA3AF'}},'Create new content under a parent page.')
-                      ),
-                      R('div',{style:{marginLeft:'auto',fontSize:'10px',color:'#9CA3AF'}},'842 ms')
-                    ),
-                    R('div',{style:{padding:'8px 12px',background:'#F9FAFB',borderRadius:'8px',fontFamily:MONO,fontSize:'11px',color:'#111928',lineHeight:1.55,marginBottom:'6px'}},
-                      R('div',{style:{color:'#6B7280',fontSize:'9px',marginBottom:'2px'}},'Input'),
-                      R('div',null,'parent: { type: "page_id", id: "36d0ad64-…" }'),
-                      R('div',null,'title: "Capability Demo Summary"'),
-                      R('div',null,'blocks: [callout, bullets, checklist]')
-                    ),
-                    R('div',{style:{padding:'8px 12px',background:'#0F172A',borderRadius:'8px',fontFamily:MONO,fontSize:'10px',color:'#D1D5DB',lineHeight:1.65}},
-                      R('div',{style:{color:'#94A3B8',fontSize:'9px',marginBottom:'2px'}},'Output'),
-                      R('div',null,'{"object":"page","id":"7e22ad64-336e-…",'),
-                      R('div',null,'  "url":"notion.so/Capability-Demo-Summary"}')
-                    )
-                  ),
-                  R('div',{style:{opacity:r3In,padding:'10px 12px',background:'#F4F5F7',borderRadius:'10px',color:'#172B4D',fontSize:'11px',lineHeight:1.45,marginBottom:'10px'}},
-                    R('div',null,'Done — the new page is live in your workspace.'),
-                    R('div',{style:{marginTop:'5px',display:'flex',alignItems:'center',gap:'6px',padding:'6px 10px',background:'#FFFFFF',border:'1px solid #DBE7FF',borderRadius:'7px'}},
-                      R('div',{style:{width:'16px',height:'16px',borderRadius:'4px',background:'#FFFFFF',border:'1px solid #E5E7EB',display:'flex',alignItems:'center',justifyContent:'center'}},NotionMark(10,'#111928')),
-                      R('div',{style:{flex:1,fontSize:'11px',color:'#1A56DB',fontFamily:MONO}},'notion.so/Capability-Demo-Summary'),
-                      R('div',{style:{fontSize:'9px',color:'#22C55E',fontWeight:700}},'✓ Created')
-                    )
-                  ),
-                  // Turn 4: ask the agent to add a fourth follow-up → notion_append_block_children → reply
-                  R('div',{style:{display:'flex',justifyContent:'flex-end',marginBottom:'10px',opacity:u4In}},
-                    R('div',{style:{padding:'10px 16px',borderRadius:'18px 18px 4px 18px',background:'#0084FF',color:'#FFFFFF',fontSize:'13px',maxWidth:'78%'}},'Add a fourth follow-up: schedule a review meeting.')
-                  ),
-                  R('div',{style:{fontSize:'10px',color:'#6B7280',marginBottom:'6px',opacity:u4In}},'From: AIAgent'),
-                  AILoadingBanner('notion_append_block_children',load4,'l4'),
-                  R('div',{style:{opacity:t4In,padding:'12px 14px',borderRadius:'10px',border:'1px solid #E5E7EB',background:'#FFFFFF',marginBottom:'12px'}},
-                    R('div',{style:{display:'flex',alignItems:'center',gap:'10px',marginBottom:'10px'}},
-                      R('span',{style:{fontSize:'14px'}},'⚙'),
-                      R('div',null,
-                        R('div',{style:{fontSize:'13px',fontWeight:600,color:'#111928'}},'Using ',R('span',{style:{fontFamily:MONO,color:'#0084FF'}},'notion_append_block_children')),
-                        R('div',{style:{fontSize:'10px',color:'#9CA3AF'}},'Append a block to an existing Notion page.')
-                      ),
-                      R('div',{style:{marginLeft:'auto',fontSize:'10px',color:'#9CA3AF'}},'594 ms')
-                    ),
-                    R('div',{style:{padding:'8px 12px',background:'#F9FAFB',borderRadius:'8px',fontFamily:MONO,fontSize:'11px',color:'#111928',lineHeight:1.55,marginBottom:'6px'}},
-                      R('div',{style:{color:'#6B7280',fontSize:'9px',marginBottom:'2px'}},'Input'),
-                      R('div',null,'block_id: "7e22ad64-336e-…"'),
-                      R('div',null,'children: [{ type:"to_do", checked:false,'),
-                      R('div',null,'  rich_text:"Schedule a review meeting" }]')
-                    ),
-                    R('div',{style:{padding:'8px 12px',background:'#0F172A',borderRadius:'8px',fontFamily:MONO,fontSize:'10px',color:'#D1D5DB',lineHeight:1.65}},
-                      R('div',{style:{color:'#94A3B8',fontSize:'9px',marginBottom:'2px'}},'Output'),
-                      R('div',null,'{"object":"list","results":[{...}]}')
-                    )
-                  ),
-                  R('div',{style:{opacity:r4In,padding:'10px 12px',background:'#F4F5F7',borderRadius:'10px',color:'#172B4D',fontSize:'11px',lineHeight:1.45}},
-                    R('div',null,'Done — added the new follow-up to your page.')
-                  )
-                )
-              )
-            )
-          );
-        })():null
+      // Body content area (to the right of the sidebar)
+      R('div',{style:{position:'absolute',left:'220px',top:(FH_CHROME_BAR_H+FH_URL_BAR_H+FH_PAGE_HDR_H+78)+'px',right:0,bottom:0,background:'#F9FAFB',padding:'0 32px 28px 32px',overflow:'hidden'}},
+        opts.body
       )
-    ),
+    );
+  }
+`;
 
-    // ─────────── PHASE D — Notion-page reveal (right half, alongside the chat) ───────────
-    // Starts at f=600, during Turn 3 of the chat. The Notion browser slides into the right
-    // half (where the AI Agent canvas just faded away), so the viewer sees the chat AND
-    // the page being modified at the same time.
-    dOp>0.005?(function(){
-      // Timings shifted -40 frames to match Phase C's new start.
-      var slideIn=easeBack(cl((f-540)/30));
-      var pageSettle=ease(cl((f-570)/30));
-      var checkOn=function(d){return ease(cl((f-(750+d))/16));};
-      var r3InLocal=ease(cl((f-675)/16));
-      var r4In=ease(cl((f-815)/16));
-      // Notion demo: touches FH right edge (FH spans 80→1320 when shrunk). Top-aligned with
-      // FH, full FH height, extends to right edge of canvas. No gap, no off-screen.
-      var nW=600, nH=900;
-      var nX=1320;
-      var nY=lerp(1080, 64, slideIn);
-      // "Edited X ago" badge — flips from "just now" to "edited a second ago" once r3 lands.
-      var editedBadge=r3InLocal>0.5?'edited a second ago':'just now';
-      // Content morph: page first shows the SOURCE ("Notion AI capability demo draft"),
-      // then morphs to the CREATED ("Capability Demo Summary") aligned with Turn 3's reply.
-      var contentMorph=easeInOut(cl((f-670)/30));
-      var skeletonOp=1-contentMorph;
-      var fullOp=contentMorph;
-      return R('div',{style:{position:'absolute',left:nX+'px',top:nY+'px',width:nW+'px',height:nH+'px',background:'#FFFFFF',borderRadius:'12px',overflow:'hidden',boxShadow:'0 40px 80px rgba(17,25,40,0.30)',border:'1px solid #D1D5DB',opacity:dOp}},
-        // Notion browser chrome — traffic lights + tab + URL
-        R('div',{style:{height:'36px',background:'#DEE1E6',display:'flex',alignItems:'flex-end',padding:'0 14px',position:'relative'}},
-          R('div',{style:{position:'absolute',left:14,top:12,width:10,height:10,borderRadius:'50%',background:'#FF5F57'}}),
-          R('div',{style:{position:'absolute',left:32,top:12,width:10,height:10,borderRadius:'50%',background:'#FEBC2E'}}),
-          R('div',{style:{position:'absolute',left:50,top:12,width:10,height:10,borderRadius:'50%',background:'#28C840'}}),
-          R('div',{style:{marginLeft:'82px',height:'28px',padding:'0 14px',background:'#F4F5F7',borderTopLeftRadius:'9px',borderTopRightRadius:'9px',display:'flex',alignItems:'center',gap:'8px',fontSize:'12px',color:'#172B4D',fontWeight:600}},
-            NotionMark(13,'#111928'),
-            R('span',null,(contentMorph<0.5?'Notion AI capability demo draft':'Capability Demo Summary')+' · Notion')
-          )
-        ),
-        R('div',{style:{height:'38px',background:'#F4F5F7',borderBottom:'1px solid #DFE1E6',display:'flex',alignItems:'center',padding:'0 16px',gap:'12px'}},
-          R('div',{style:{display:'flex',gap:'10px',color:'#9AA0A6',fontSize:'14px'}},R('span',null,'←'),R('span',null,'→'),R('span',null,'↻')),
-          R('div',{style:{flex:1,padding:'5px 14px',background:'#FFFFFF',border:'1px solid #DFE1E6',borderRadius:'14px',fontSize:'12px',color:'#42526E',display:'flex',alignItems:'center',gap:'10px'}},
-            R('div',{style:{width:7,height:7,borderRadius:'50%',background:'#22C55E'}}),
-            R('span',{style:{color:'#172B4D'}},'notion.so'),
-            R('span',{style:{color:'#6B7280'}},contentMorph<0.5?'/Notion-AI-capability-demo-draft-36d0ad64336e80c18627e0c275f0da3b':'/Capability-Demo-Summary-7e22ad64336e80b1a4f4c1e0b89df073')
-          )
-        ),
-        // Notion page body — TWO STATES overlaid with opacity, morphing skeleton → full content.
-        // Mirrors Scene 4's source-page → created-page morph: starts "bad" (empty placeholder),
-        // becomes "better" (full Capability Demo Summary with bullets + checklist).
-        R('div',{style:{padding:'36px 48px 28px 48px',position:'relative',transform:'translateY('+(16*(1-pageSettle))+'px)',opacity:pageSettle,minHeight:'480px'}},
-          // "Created via Notion MCP" badge — only visible AFTER the page morphs (created state)
-          R('div',{style:{position:'absolute',top:'14px',right:'20px',padding:'4px 10px',background:'#DCFCE7',color:'#15803D',fontSize:'10px',fontWeight:700,borderRadius:'12px',border:'1px solid #86EFAC',display:'flex',alignItems:'center',gap:'5px',opacity:fullOp}},
-            R('span',null,'✓'),'Created via Notion MCP'
-          ),
-          // SOURCE PAGE state — the page the agent fetched ("Notion AI capability demo draft").
-          // Mirrors the actual Notion content from the user's workspace, matches Scene 4's right pane.
-          R('div',{style:{position:'absolute',left:'48px',right:'48px',top:'36px',opacity:skeletonOp}},
-            R('div',{style:{fontSize:'30px',fontWeight:800,color:'#111928',letterSpacing:'-0.8px',marginBottom:'20px'}},'Notion AI capability demo draft'),
-            R('div',{style:{fontSize:'17px',fontWeight:700,color:'#111928',marginTop:'14px'}},'Quick actions'),
-            R('div',{style:{fontSize:'13px',color:'#374151',marginTop:'4px'}},'• Add your assignment list as a checklist with due dates'),
-            R('div',{style:{fontSize:'17px',fontWeight:700,color:'#111928',marginTop:'14px'}},'Mini slide deck'),
-            R('div',{style:{fontSize:'13px',color:'#374151',marginTop:'4px'}},'Use Present to view as slides.'),
-            R('div',{style:{fontSize:'17px',fontWeight:700,color:'#111928',marginTop:'14px'}},'Slide 1: Goal'),
-            R('div',{style:{fontSize:'13px',color:'#374151',marginTop:'4px'}},'Show structure: headings, lists, callouts, tables'),
-            R('div',{style:{fontSize:'17px',fontWeight:700,color:'#111928',marginTop:'14px'}},'Slide 2: Output types'),
-            R('div',{style:{fontSize:'13px',color:'#374151',marginTop:'4px'}},'Summaries and outlines')
-          ),
-          // FULL CONTENT (final "better" state)
-          R('div',{style:{position:'absolute',left:'48px',right:'48px',top:'36px',opacity:fullOp}},
-            R('div',{style:{fontSize:'30px',fontWeight:800,color:'#111928',letterSpacing:'-0.8px',marginBottom:'6px'}},'Capability Demo Summary'),
-            R('div',{style:{fontSize:'12px',color:'#9CA3AF',marginBottom:'20px',display:'flex',alignItems:'center',gap:'8px'}},
-              R('span',null,'Created by Using Notion Tool'),
-              R('span',{style:{color:'#D1D5DB'}},'·'),
-              R('span',{style:{color:r3InLocal>0.5?'#15803D':'#9CA3AF',fontWeight:r3InLocal>0.5?600:400}},editedBadge)
-            ),
-            R('div',{style:{padding:'12px 16px',background:'#EEF4FF',border:'1px solid #DBE7FF',borderRadius:'10px',color:'#1A56DB',fontSize:'13px',marginBottom:'20px',display:'flex',alignItems:'center',gap:'10px'}},
-              R('div',{style:{width:'20px',height:'20px',borderRadius:'5px',background:'#FFFFFF',border:'1px solid #DBE7FF',display:'flex',alignItems:'center',justifyContent:'center'}},NotionMark(12,'#111928')),
-              R('div',null,R('span',{style:{fontWeight:700}},'Source: '),'Notion AI capability demo draft')
-            ),
-            R('div',{style:{fontSize:'18px',fontWeight:700,color:'#111928',marginBottom:'8px'}},'Summary'),
-            R('div',{style:{fontSize:'13px',color:'#374151',lineHeight:1.65,marginBottom:'18px'}},
-              R('div',null,'•  Quick actions for ad-hoc checklists and rewrites.'),
-              R('div',null,'•  A mini slide deck used in Presentation Mode.'),
-              R('div',null,'•  Two example slides covering goal and output types.')
-            ),
-            R('div',{style:{fontSize:'18px',fontWeight:700,color:'#111928',marginBottom:'8px'}},'Follow-ups'),
-            R('div',{style:{fontSize:'13px',color:'#374151',lineHeight:1.85}},
-              R('div',{style:{display:'flex',alignItems:'center',gap:'10px'}},
-                R('div',{style:{width:'14px',height:'14px',borderRadius:'3px',border:'1.5px solid #9CA3AF',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'9px',color:'#FFFFFF',background:checkOn(0)>0.5?'#22C55E':'transparent',borderColor:checkOn(0)>0.5?'#22C55E':'#9CA3AF'}},checkOn(0)>0.5?'✓':''),
-                R('span',null,'Pick a real "Quick actions" task to walk through with the agent.')
-              ),
-              R('div',{style:{display:'flex',alignItems:'center',gap:'10px'}},
-                R('div',{style:{width:'14px',height:'14px',borderRadius:'3px',border:'1.5px solid #9CA3AF'}}),
-                R('span',null,'Record the slide deck as a thirty-second screen capture.')
-              ),
-              R('div',{style:{display:'flex',alignItems:'center',gap:'10px'}},
-                R('div',{style:{width:'14px',height:'14px',borderRadius:'3px',border:'1.5px solid #9CA3AF'}}),
-                R('span',null,'Link this summary back from the source page.')
-              ),
-              R('div',{style:{display:'flex',alignItems:'center',gap:'10px',opacity:r4In}},
-                R('div',{style:{width:'14px',height:'14px',borderRadius:'3px',border:'1.5px solid #0084FF',background:r4In>0.5?'#EEF4FF':'transparent'}}),
-                R('span',{style:{color:r4In>0.5?'#0084FF':'#9CA3AF',fontWeight:r4In>0.5?600:400}},'Schedule a review meeting.')
-              )
-            )
-          )
-        )
-      );
-    })():null
+/* ============================================================================
+ * SCENE 5 — FH Marketplace (Phase A — integrations grid)
+ * ========================================================================== */
+const FHMarketplaceScene = `function FHMarketplaceScene(props){${HELPERS}${FH_CHROME_HELPERS}
+  var f=props.frame||0;
+  var END=90;
+  var sceneOut=easeIn(cl((f-(END-22))/22));
+  var op=1-sceneOut;
+  var inP=ease(cl(f/22));
+  var body=R('div',{style:{position:'relative',opacity:inP}},
+    R('div',{style:{display:'flex',gap:'12px',marginBottom:'24px'}},
+      R('div',{style:{width:'320px',height:'40px',borderRadius:'8px',border:'1px solid #E5E7EB',display:'flex',alignItems:'center',padding:'0 14px',fontSize:'14px',color:'#111928',background:'#FFFFFF'}},R('span',{style:{color:'#9CA3AF',marginRight:'10px'}},'⌕'),'notion'),
+      R('div',{style:{width:'120px',height:'40px',borderRadius:'8px',border:'1px solid #E5E7EB',display:'flex',alignItems:'center',padding:'0 14px',fontSize:'14px',color:'#374151',background:'#FFFFFF'}},'Category  ▾')
+    ),
+    R('div',{style:{display:'grid',gridTemplateColumns:'repeat(4, 1fr)',gap:'18px'}},
+      R('div',{key:'n',style:{padding:'22px',borderRadius:'14px',border:'2px solid #0084FF',background:'#F8FBFF'}},
+        R('div',{style:{width:'48px',height:'48px',borderRadius:'10px',background:'#111928',display:'flex',alignItems:'center',justifyContent:'center',marginBottom:'14px'}},NotionMark(28,'#FFFFFF')),
+        R('div',{style:{fontSize:'18px',fontWeight:700,color:'#111928',marginBottom:'6px'}},'Notion'),
+        R('div',{style:{fontSize:'12px',color:'#6B7280',lineHeight:1.45,marginBottom:'14px'}},'Pages & databases'),
+        R('div',{style:{height:'36px',borderRadius:'8px',background:grad,color:'#FFFFFF',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'13px',fontWeight:600,boxShadow:f>=60?'0 0 18px rgba(0,132,255,0.45)':'none'}},'Integrate')
+      ),
+      [{n:'Slack',bg:'#FFFFFF',mark:SlackMark(28),sub:'Send messages'},{n:'GitHub',bg:'#0F172A',mark:GitHubMark(28),sub:'Repos & PRs'},{n:'Google Drive',bg:'#FFFFFF',mark:DriveMark(28),sub:'Files & docs'}].map(function(it,i){
+        var p=ease(cl((f-(30+i*8))/22));
+        return R('div',{key:'g'+i,style:{padding:'22px',borderRadius:'14px',border:'1px solid #E5E7EB',background:'#FFFFFF',opacity:p,transform:'translateY('+(8*(1-p))+'px)'}},
+          R('div',{style:{width:'48px',height:'48px',borderRadius:'10px',background:it.bg,border:it.bg==='#FFFFFF'?'1px solid #E5E7EB':'none',display:'flex',alignItems:'center',justifyContent:'center',marginBottom:'14px'}},it.mark),
+          R('div',{style:{fontSize:'18px',fontWeight:700,color:'#111928',marginBottom:'6px'}},it.n),
+          R('div',{style:{fontSize:'12px',color:'#6B7280',lineHeight:1.45,marginBottom:'14px'}},it.sub),
+          R('div',{style:{height:'36px',borderRadius:'8px',border:'1px solid #E5E7EB',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'13px',fontWeight:600,color:'#374151'}},'Integrate')
+        );
+      })
+    )
+  );
+  return R('div',{style:{width:'100%',height:'100%',background:'#EEF1F4',position:'relative',fontFamily:INTER,opacity:op,overflow:'hidden'}},
+    SectionLabel('Scene 5 · Marketplace'),
+    FHChrome({
+      gradId:'mkt',
+      tabText:'Integrations · FlowHunt',
+      urlPath:'/integrations',
+      activeNav:'Integrations',
+      rightBtnText:'New agent',
+      showEditRun:false,
+      eyebrow:'INTEGRATE NOTION',
+      title:'Add Notion the same way you added Claude Code — two clicks in your browser.',
+      body:body
+    })
   );
 }`;
 
 /* ============================================================================
- * SCENE 6 — CTA (FlowHunt mark + wordmark at the BOTTOM)
+ * SCENE 6 — FH Tool catalog (Phase B — 2-col scrolling tool list)
+ * ========================================================================== */
+const FHToolCatalogScene = `function FHToolCatalogScene(props){${HELPERS}${FH_CHROME_HELPERS}
+  var f=props.frame||0;
+  var END=180;
+  var sceneOut=easeIn(cl((f-(END-22))/22));
+  var op=1-sceneOut;
+  var allTools=['Search Notion','Retrieve Notion Page','Retrieve Notion Block','Retrieve Notion Data Source','Retrieve Notion Comments','Retrieve Notion Page Property','Create Notion Page','Create Notion Comment','Create Notion Data Source','Append Notion Block Children','Update Notion Page','Update Notion Block','Update Notion Data Source','Move Notion Page','Delete Notion Block','Get Notion Block Children','Get Notion Bot User','Get Notion User','List Notion Users','List Notion Data Source Templates','Query Notion Data Source'];
+  // Pure linear scroll, constant velocity throughout. 100 frames travel.
+  var scrollT=cl((f-30)/68);
+  var scrollY=-scrollT*640;
+  var body=R('div',{style:{position:'absolute',inset:'0',padding:'0 32px 28px 32px'}},
+    R('div',{style:{background:'#FFFFFF',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'22px 28px',height:'100%',display:'flex',flexDirection:'column'}},
+      R('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'14px'}},
+        R('div',{style:{fontSize:'17px',fontWeight:700,color:'#111928'}},'Select a Tool'),
+        R('div',{style:{display:'flex',alignItems:'center',gap:'10px',fontSize:'12px',color:'#6B7280'}},
+          R('div',{style:{padding:'5px 10px',borderRadius:'6px',background:'#EEF4FF',color:'#1A56DB',fontWeight:600}},'notion'),
+          R('div',null,allTools.length+' tools')
+        )
+      ),
+      R('div',{style:{position:'relative',flex:1,overflow:'hidden',borderTop:'1px solid #F3F4F6'}},
+        R('div',{style:{position:'absolute',top:0,left:0,right:'18px',padding:'14px 0',transform:'translateY('+scrollY+'px)'}},
+          R('div',{style:{display:'grid',gridTemplateColumns:'repeat(2, 1fr)',gap:'14px'}},
+            allTools.map(function(t,i){
+              return R('div',{key:i,style:{padding:'18px 20px',borderRadius:'12px',border:'1px solid #E5E7EB',background:'#FFFFFF'}},
+                R('div',{style:{display:'flex',alignItems:'center',gap:'10px',marginBottom:'10px'}},
+                  R('div',{style:{width:'30px',height:'30px',borderRadius:'7px',background:'#FFFFFF',border:'1px solid #E5E7EB',display:'flex',alignItems:'center',justifyContent:'center'}},NotionMark(18,'#111928')),
+                  R('div',{style:{padding:'3px 8px',borderRadius:'8px',background:'#F3F4F6',fontSize:'11px',color:'#6B7280',fontWeight:600}},'notion')
+                ),
+                R('div',{style:{fontSize:'15px',fontWeight:700,color:'#111928'}},t)
+              );
+            })
+          )
+        ),
+        R('div',{style:{position:'absolute',right:'4px',top:'12px',bottom:'12px',width:'4px',borderRadius:'2px',background:'#F3F4F6'}}),
+        R('div',{style:{position:'absolute',right:'4px',top:(12+scrollT*340)+'px',width:'4px',height:'92px',borderRadius:'2px',background:grad}})
+      )
+    )
+  );
+  return R('div',{style:{width:'100%',height:'100%',background:'#EEF1F4',position:'relative',fontFamily:INTER,opacity:op,overflow:'hidden'}},
+    SectionLabel('Scene 6 · Tool catalog'),
+    FHChrome({
+      gradId:'cat',
+      tabText:'Using Notion Tool · FlowHunt',
+      urlPath:'/agents/using-notion-tool/edit',
+      activeNav:'My Agents',
+      rightBtnText:'Add to my agents',
+      showEditRun:true,
+      runActive:false,
+      eyebrow:'EVERY NOTION TOOL',
+      title:'All twenty-one Notion tools are picked up automatically, ready for any agent you build.',
+      body:body
+    })
+  );
+}`;
+
+/* ============================================================================
+ * SCENE 7 — FH Chat 1 (Phase C, turns 1 & 2 only)
+ *   u1 (capabilities) + LoadingDots + r1
+ *   u2 (find page) + AILoadingBanner notion_search + tool widget + r2
+ * Canvas on the left (small AI Agent card) + chat panel on the right.
+ * ========================================================================== */
+const FHChat1Scene = `function FHChat1Scene(props){${HELPERS}${FH_CHROME_HELPERS}
+  var f=props.frame||0;
+  var END=240;
+  var sceneOut=easeIn(cl((f-(END-22))/22));
+  var op=1-sceneOut;
+  var canvasIn=ease(cl((f-10)/22));
+  // Turn 1 timings (scene-local)
+  var u1In=ease(cl((f-18)/14));
+  var load1=cl(ease(cl((f-65)/12))-easeIn(cl((f-115)/10)));
+  var r1In=ease(cl((f-120)/16));
+  // Turn 2 timings
+  var u2In=ease(cl((f-170)/14));
+  var load2=cl(ease(cl((f-200)/12))-easeIn(cl((f-225)/10)));
+  var t2In=ease(cl((f-225)/18));
+  // r2 falls slightly past the scene boundary in the original; here we just hold what we can
+  var r2In=ease(cl((f-260)/16)); // begins as scene fades out, but Phase C continues into Chat2
+  function tilesP(i){return ease(cl((f-(90+i*1.2))/14));}
+  function LoadingDots(opacity, key){
+    if(opacity<0.05) return null;
+    var t=f*0.35;
+    var d1=0.4+0.6*(Math.sin(t)*0.5+0.5);
+    var d2=0.4+0.6*(Math.sin(t+0.55)*0.5+0.5);
+    var d3=0.4+0.6*(Math.sin(t+1.1)*0.5+0.5);
+    return R('div',{key:key,style:{display:'flex',alignItems:'center',gap:'5px',padding:'10px 14px',borderRadius:'12px',background:'#F4F5F7',width:'fit-content',marginBottom:'10px',opacity:opacity}},
+      R('div',{style:{width:'7px',height:'7px',borderRadius:'50%',background:'#6B7280',opacity:d1,transform:'scale('+(0.7+0.3*d1)+')'}}),
+      R('div',{style:{width:'7px',height:'7px',borderRadius:'50%',background:'#6B7280',opacity:d2,transform:'scale('+(0.7+0.3*d2)+')'}}),
+      R('div',{style:{width:'7px',height:'7px',borderRadius:'50%',background:'#6B7280',opacity:d3,transform:'scale('+(0.7+0.3*d3)+')'}})
+    );
+  }
+  function AILoadingBanner(toolName, opacity, key){
+    if(opacity<0.05) return null;
+    var pulse=Math.sin(f*0.32)*0.5+0.5;
+    return R('div',{key:key,style:{padding:'8px 14px',borderRadius:'10px',background:'#FFFFFF',border:'1px solid #DBE7FF',display:'flex',alignItems:'center',gap:'10px',width:'fit-content',marginBottom:'10px',opacity:opacity}},
+      R('div',{style:{width:'12px',height:'12px',borderRadius:'50%',background:'#0084FF',opacity:0.4+0.6*pulse,boxShadow:'0 0 '+(6+8*pulse)+'px rgba(0,132,255,0.55)'}}),
+      R('div',{style:{fontSize:'12px',color:'#6B7280'}},'Using ',R('span',{style:{fontFamily:MONO,fontWeight:600,color:'#0084FF'}},toolName))
+    );
+  }
+  var body=R('div',{style:{position:'absolute',inset:'0',padding:'0 32px 28px 32px',display:'flex',gap:'18px'}},
+    // LEFT: canvas
+    R('div',{style:{flex:'0 0 540px',background:'#FFFFFF',borderRadius:'12px',border:'1px solid #E5E7EB',overflow:'hidden',display:'flex',flexDirection:'column',opacity:canvasIn}},
+      R('div',{style:{flex:1,position:'relative',backgroundImage:'radial-gradient(#D1D5DB 1px, transparent 1px)',backgroundSize:'20px 20px',padding:'30px 20px',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'2px'}},
+        R('div',{style:{width:'180px',height:'62px',borderRadius:'12px',background:'#10B981',display:'flex',flexDirection:'column',justifyContent:'space-between',padding:'10px 14px',boxShadow:'0 8px 20px rgba(16,185,129,0.30)'}},
+          R('div',{style:{display:'flex',alignItems:'center',gap:'7px'}},R('span',{style:{display:'inline-block',width:'11px',height:'11px',borderRadius:'3px',background:'rgba(255,255,255,0.45)'}}),R('span',{style:{color:'#FFFFFF',fontSize:'13px',fontWeight:700}},'Chat Input')),
+          R('div',{style:{alignSelf:'flex-end',display:'flex',alignItems:'center',gap:'4px',color:'#FFFFFF',fontSize:'10px',opacity:0.9}},'Message',R('span',{style:{display:'inline-block',width:'6px',height:'6px',borderRadius:'50%',background:'#FFFFFF'}}))
+        ),
+        R('div',{style:{width:'2px',height:'10px',background:'#94A3B8'}}),
+        R('div',{style:{width:'22px',height:'22px',borderRadius:'50%',background:'#FFFFFF',border:'1.5px solid #0084FF',display:'flex',alignItems:'center',justifyContent:'center',color:'#0084FF',fontSize:'13px',fontWeight:700}},'+'),
+        R('div',{style:{width:'2px',height:'10px',background:'#94A3B8'}}),
+        R('div',{style:{width:'460px',borderRadius:'14px',background:'#FFFFFF',border:'2px dashed #F472B6',padding:'14px 18px',boxShadow:'0 10px 26px rgba(244,114,182,0.15)'}},
+          R('div',{style:{display:'flex',alignItems:'center',gap:'10px',marginBottom:'12px'}},
+            R('div',{style:{display:'flex',alignItems:'center',gap:'8px',padding:'4px 10px',borderRadius:'8px',background:'#FCE7F3'}},
+              R('span',{style:{display:'inline-block',width:'10px',height:'10px',borderRadius:'2px',background:'#F472B6'}}),
+              R('span',{style:{fontSize:'13px',fontWeight:700,color:'#BE185D'}},'AI Agent')
+            ),
+            R('div',{style:{marginLeft:'auto',fontSize:'10px',color:'#9CA3AF',fontWeight:600,letterSpacing:'0.5px'}},'21 TOOLS')
+          ),
+          R('div',{style:{display:'flex',flexWrap:'wrap',gap:'5px'}},
+            [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].map(function(i){
+              var p=tilesP(i);
+              return R('div',{key:i,style:{width:'20px',height:'20px',borderRadius:'5px',background:'#111928',display:'flex',alignItems:'center',justifyContent:'center',opacity:p,transform:'scale('+(0.6+0.4*p)+')'}},NotionMark(12,'#FFFFFF'));
+            })
+          )
+        ),
+        R('div',{style:{width:'2px',height:'10px',background:'#94A3B8'}}),
+        R('div',{style:{width:'22px',height:'22px',borderRadius:'50%',background:'#FFFFFF',border:'1.5px solid #0084FF',display:'flex',alignItems:'center',justifyContent:'center',color:'#0084FF',fontSize:'13px',fontWeight:700}},'+'),
+        R('div',{style:{width:'2px',height:'10px',background:'#94A3B8'}}),
+        R('div',{style:{width:'160px',height:'52px',borderRadius:'12px',background:'#F87171',display:'flex',flexDirection:'column',justifyContent:'space-between',padding:'8px 14px',boxShadow:'0 8px 20px rgba(248,113,113,0.30)'}},
+          R('div',{style:{display:'flex',alignItems:'center',gap:'7px'}},R('span',{style:{display:'inline-block',width:'10px',height:'10px',borderRadius:'3px',background:'rgba(255,255,255,0.45)'}}),R('span',{style:{color:'#FFFFFF',fontSize:'12px',fontWeight:700}},'Chat Output')),
+          R('div',{style:{alignSelf:'flex-start',display:'flex',alignItems:'center',gap:'4px',color:'#FFFFFF',fontSize:'10px',opacity:0.9}},R('span',{style:{display:'inline-block',width:'6px',height:'6px',borderRadius:'50%',background:'#FFFFFF'}}),'Message')
+        )
+      )
+    ),
+    // RIGHT: chat panel
+    R('div',{style:{flex:1,background:'#FFFFFF',borderRadius:'12px',border:'1px solid #E5E7EB',overflow:'hidden',display:'flex',flexDirection:'column'}},
+      R('div',{style:{padding:'12px 22px',borderBottom:'1px solid #F3F4F6',display:'flex',alignItems:'center',gap:'10px',background:'#F9FAFB'}},
+        R('div',{style:{width:'26px',height:'26px',borderRadius:'7px',background:'#FFFFFF',border:'1px solid #E5E7EB',display:'flex',alignItems:'center',justifyContent:'center'}},NotionMark(16,'#111928')),
+        R('div',{style:{fontSize:'14px',fontWeight:700,color:'#111928'}},'Using Notion Tool'),
+        R('div',{style:{marginLeft:'auto',display:'flex',alignItems:'center',gap:'5px',fontSize:'11px',color:'#22C55E',fontWeight:700}},R('span',{style:{display:'inline-block',width:'7px',height:'7px',borderRadius:'50%',background:'#22C55E'}}),'Live')
+      ),
+      R('div',{style:{flex:1,position:'relative',overflow:'hidden'}},
+        R('div',{style:{position:'absolute',left:0,right:0,top:0,padding:'18px 22px'}},
+          // Turn 1
+          R('div',{style:{display:'flex',justifyContent:'flex-end',marginBottom:'10px',opacity:u1In}},
+            R('div',{style:{padding:'10px 16px',borderRadius:'18px 18px 4px 18px',background:'#0084FF',color:'#FFFFFF',fontSize:'13px',maxWidth:'78%'}},'Explain what you can do with all your Notion tools.')
+          ),
+          LoadingDots(load1,'l1'),
+          R('div',{style:{opacity:r1In,padding:'10px 12px',background:'#F4F5F7',borderRadius:'10px',color:'#172B4D',fontSize:'11px',lineHeight:1.45,marginBottom:'10px'}},
+            R('div',{style:{fontWeight:700,fontSize:'12px',marginBottom:'4px'}},'Here\\'s what I can do for you in Notion:'),
+            R('div',null,R('span',{style:{fontWeight:700,color:'#111928'}},'1) Find things'),' — semantic search (',R('span',{style:{fontFamily:MONO,color:'#0084FF'}},'notion_search'),').'),
+            R('div',null,R('span',{style:{fontWeight:700,color:'#111928'}},'2) Read content'),' — page bodies, blocks, properties.'),
+            R('div',null,R('span',{style:{fontWeight:700,color:'#111928'}},'3) Query databases'),' — filter and sort with structured queries.'),
+            R('div',null,R('span',{style:{fontWeight:700,color:'#111928'}},'4) Create new content'),' — pages, databases, comments, blocks.'),
+            R('div',null,R('span',{style:{fontWeight:700,color:'#111928'}},'5) Edit & organise'),' — update, move, archive.')
+          ),
+          // Turn 2
+          R('div',{style:{display:'flex',justifyContent:'flex-end',marginBottom:'10px',opacity:u2In}},
+            R('div',{style:{padding:'10px 16px',borderRadius:'18px 18px 4px 18px',background:'#0084FF',color:'#FFFFFF',fontSize:'13px',maxWidth:'78%'}},'Can you find a page called "Notion AI capability demo draft"?')
+          ),
+          R('div',{style:{fontSize:'10px',color:'#6B7280',marginBottom:'6px',opacity:u2In}},'From: AIAgent'),
+          AILoadingBanner('notion_search',load2,'l2'),
+          R('div',{style:{opacity:t2In,padding:'12px 14px',borderRadius:'10px',border:'1px solid #E5E7EB',background:'#FFFFFF',marginBottom:'12px'}},
+            R('div',{style:{display:'flex',alignItems:'center',gap:'10px',marginBottom:'10px'}},
+              R('span',{style:{fontSize:'14px'}},'⚙'),
+              R('div',null,
+                R('div',{style:{fontSize:'13px',fontWeight:600,color:'#111928'}},'Using ',R('span',{style:{fontFamily:MONO,color:'#0084FF'}},'notion_search')),
+                R('div',{style:{fontSize:'10px',color:'#9CA3AF'}},'Search for pages and databases by title in Notion.')
+              ),
+              R('div',{style:{marginLeft:'auto',fontSize:'10px',color:'#9CA3AF'}},'1103 ms')
+            ),
+            R('div',{style:{padding:'8px 12px',background:'#F9FAFB',borderRadius:'8px',fontFamily:MONO,fontSize:'11px',color:'#111928',lineHeight:1.55,marginBottom:'6px'}},
+              R('div',{style:{color:'#6B7280',fontSize:'9px',marginBottom:'2px'}},'Input'),
+              R('div',null,'query: "Notion AI capability demo draft"'),
+              R('div',null,'filter_type: page')
+            ),
+            R('div',{style:{padding:'8px 12px',background:'#0F172A',borderRadius:'8px',fontFamily:MONO,fontSize:'10px',color:'#D1D5DB',lineHeight:1.65}},
+              R('div',{style:{color:'#94A3B8',fontSize:'9px',marginBottom:'2px'}},'Output'),
+              R('div',null,'[{"object":"page","id":"36d0ad64-336e-80c1-…",'),
+              R('div',null,'  "title":"Notion AI capability demo draft",'),
+              R('div',null,'  "url":"notion.so/Notion-AI-capability-…"}]')
+            )
+          ),
+          R('div',{style:{opacity:r2In,padding:'10px 12px',background:'#F4F5F7',borderRadius:'10px',color:'#172B4D',fontSize:'11px',lineHeight:1.45,marginBottom:'10px'}},
+            R('div',null,'Yes — I can see it.'),
+            R('div',null,R('span',{style:{fontWeight:700,color:'#111928'}},'Page:'),' Notion AI capability demo draft'),
+            R('div',null,R('span',{style:{fontWeight:700,color:'#111928'}},'Last edited:'),' 2026-05-27 18:41')
+          )
+        )
+      )
+    )
+  );
+  return R('div',{style:{width:'100%',height:'100%',background:'#EEF1F4',position:'relative',fontFamily:INTER,opacity:op,overflow:'hidden'}},
+    SectionLabel('Scene 7 · Chat (turns 1–2)'),
+    FHChrome({
+      gradId:'c1',
+      tabText:'Using Notion Tool · FlowHunt',
+      urlPath:'/agents/using-notion-tool/run',
+      activeNav:'My Agents',
+      rightBtnText:'Publish Agent',
+      showEditRun:true,
+      runActive:true,
+      eyebrow:'AGENT, RUNNING',
+      title:'Run the agent, ask anything, and watch it call Notion live — no terminal required.',
+      body:body
+    })
+  );
+}`;
+
+/* ============================================================================
+ * SCENE 8 — FH Chat 2 (Phase C turns 3 & 4 + Phase D Notion morph)
+ * FH browser shrinks from 1760 → 1240 over the first 30 frames. The Notion
+ * side panel appears at nX=1320, nW=600, nH=900, nY=64 and morphs from the
+ * source page to the created "Capability Demo Summary".
+ * ========================================================================== */
+const FHChat2Scene = `function FHChat2Scene(props){${HELPERS}${FH_CHROME_HELPERS}
+  var f=props.frame||0;
+  var END=270;
+  var sceneOut=easeIn(cl((f-(END-22))/22));
+  var op=1-sceneOut;
+  // FH browser shrinks over the first 30 frames (the layout transition)
+  var dPhase=ease(cl(f/30));
+  var browserW=lerp(1760,1240,dPhase);
+  // Turn 3 timings (scene-local, mapped from original f=580→) — start almost immediately
+  var u3In=ease(cl((f-10)/14));
+  var load3=cl(ease(cl((f-40)/12))-easeIn(cl((f-60)/10)));
+  var t3In=ease(cl((f-60)/18));
+  var r3In=ease(cl((f-105)/16));
+  // Turn 4 timings (mapped from original f=720→)
+  var u4In=ease(cl((f-150)/14));
+  var load4=cl(ease(cl((f-180)/12))-easeIn(cl((f-200)/10)));
+  var t4In=ease(cl((f-200)/18));
+  var r4In=ease(cl((f-245)/16));
+  function AILoadingBanner(toolName, opacity, key){
+    if(opacity<0.05) return null;
+    var pulse=Math.sin(f*0.32)*0.5+0.5;
+    return R('div',{key:key,style:{padding:'8px 14px',borderRadius:'10px',background:'#FFFFFF',border:'1px solid #DBE7FF',display:'flex',alignItems:'center',gap:'10px',width:'fit-content',marginBottom:'10px',opacity:opacity}},
+      R('div',{style:{width:'12px',height:'12px',borderRadius:'50%',background:'#0084FF',opacity:0.4+0.6*pulse,boxShadow:'0 0 '+(6+8*pulse)+'px rgba(0,132,255,0.55)'}}),
+      R('div',{style:{fontSize:'12px',color:'#6B7280'}},'Using ',R('span',{style:{fontFamily:MONO,fontWeight:600,color:'#0084FF'}},toolName))
+    );
+  }
+  // Body content — chat only (canvas faded away with shrink). Centred + sized to the shrunk width.
+  var body=R('div',{style:{position:'absolute',inset:'0',padding:'0 32px 28px 32px'}},
+    R('div',{style:{height:'100%',background:'#FFFFFF',borderRadius:'12px',border:'1px solid #E5E7EB',overflow:'hidden',display:'flex',flexDirection:'column'}},
+      R('div',{style:{padding:'12px 22px',borderBottom:'1px solid #F3F4F6',display:'flex',alignItems:'center',gap:'10px',background:'#F9FAFB'}},
+        R('div',{style:{width:'26px',height:'26px',borderRadius:'7px',background:'#FFFFFF',border:'1px solid #E5E7EB',display:'flex',alignItems:'center',justifyContent:'center'}},NotionMark(16,'#111928')),
+        R('div',{style:{fontSize:'14px',fontWeight:700,color:'#111928'}},'Using Notion Tool'),
+        R('div',{style:{marginLeft:'auto',display:'flex',alignItems:'center',gap:'5px',fontSize:'11px',color:'#22C55E',fontWeight:700}},R('span',{style:{display:'inline-block',width:'7px',height:'7px',borderRadius:'50%',background:'#22C55E'}}),'Live')
+      ),
+      R('div',{style:{flex:1,position:'relative',overflow:'hidden'}},
+        R('div',{style:{position:'absolute',left:0,right:0,top:0,padding:'18px 22px'}},
+          // Turn 3
+          R('div',{style:{display:'flex',justifyContent:'flex-end',marginBottom:'10px',opacity:u3In}},
+            R('div',{style:{padding:'10px 16px',borderRadius:'18px 18px 4px 18px',background:'#0084FF',color:'#FFFFFF',fontSize:'13px',maxWidth:'78%'}},'Create a summary page under the same parent.')
+          ),
+          R('div',{style:{fontSize:'10px',color:'#6B7280',marginBottom:'6px',opacity:u3In}},'From: AIAgent'),
+          AILoadingBanner('notion_create_pages',load3,'l3'),
+          R('div',{style:{opacity:t3In,padding:'12px 14px',borderRadius:'10px',border:'1px solid #E5E7EB',background:'#FFFFFF',marginBottom:'12px'}},
+            R('div',{style:{display:'flex',alignItems:'center',gap:'10px',marginBottom:'10px'}},
+              R('span',{style:{fontSize:'14px'}},'⚙'),
+              R('div',null,
+                R('div',{style:{fontSize:'13px',fontWeight:600,color:'#111928'}},'Using ',R('span',{style:{fontFamily:MONO,color:'#0084FF'}},'notion_create_pages')),
+                R('div',{style:{fontSize:'10px',color:'#9CA3AF'}},'Create new content under a parent page.')
+              ),
+              R('div',{style:{marginLeft:'auto',fontSize:'10px',color:'#9CA3AF'}},'842 ms')
+            ),
+            R('div',{style:{padding:'8px 12px',background:'#F9FAFB',borderRadius:'8px',fontFamily:MONO,fontSize:'11px',color:'#111928',lineHeight:1.55,marginBottom:'6px'}},
+              R('div',{style:{color:'#6B7280',fontSize:'9px',marginBottom:'2px'}},'Input'),
+              R('div',null,'parent: { type: "page_id", id: "36d0ad64-…" }'),
+              R('div',null,'title: "Capability Demo Summary"'),
+              R('div',null,'blocks: [callout, bullets, checklist]')
+            ),
+            R('div',{style:{padding:'8px 12px',background:'#0F172A',borderRadius:'8px',fontFamily:MONO,fontSize:'10px',color:'#D1D5DB',lineHeight:1.65}},
+              R('div',{style:{color:'#94A3B8',fontSize:'9px',marginBottom:'2px'}},'Output'),
+              R('div',null,'{"object":"page","id":"7e22ad64-336e-…",'),
+              R('div',null,'  "url":"notion.so/Capability-Demo-Summary"}')
+            )
+          ),
+          R('div',{style:{opacity:r3In,padding:'10px 12px',background:'#F4F5F7',borderRadius:'10px',color:'#172B4D',fontSize:'11px',lineHeight:1.45,marginBottom:'10px'}},
+            R('div',null,'Done — the new page is live in your workspace.'),
+            R('div',{style:{marginTop:'5px',display:'flex',alignItems:'center',gap:'6px',padding:'6px 10px',background:'#FFFFFF',border:'1px solid #DBE7FF',borderRadius:'7px'}},
+              R('div',{style:{width:'16px',height:'16px',borderRadius:'4px',background:'#FFFFFF',border:'1px solid #E5E7EB',display:'flex',alignItems:'center',justifyContent:'center'}},NotionMark(10,'#111928')),
+              R('div',{style:{flex:1,fontSize:'11px',color:'#1A56DB',fontFamily:MONO}},'notion.so/Capability-Demo-Summary'),
+              R('div',{style:{fontSize:'9px',color:'#22C55E',fontWeight:700}},'✓ Created')
+            )
+          ),
+          // Turn 4
+          R('div',{style:{display:'flex',justifyContent:'flex-end',marginBottom:'10px',opacity:u4In}},
+            R('div',{style:{padding:'10px 16px',borderRadius:'18px 18px 4px 18px',background:'#0084FF',color:'#FFFFFF',fontSize:'13px',maxWidth:'78%'}},'Add a fourth follow-up: schedule a review meeting.')
+          ),
+          R('div',{style:{fontSize:'10px',color:'#6B7280',marginBottom:'6px',opacity:u4In}},'From: AIAgent'),
+          AILoadingBanner('notion_append_block_children',load4,'l4'),
+          R('div',{style:{opacity:t4In,padding:'12px 14px',borderRadius:'10px',border:'1px solid #E5E7EB',background:'#FFFFFF',marginBottom:'12px'}},
+            R('div',{style:{display:'flex',alignItems:'center',gap:'10px',marginBottom:'10px'}},
+              R('span',{style:{fontSize:'14px'}},'⚙'),
+              R('div',null,
+                R('div',{style:{fontSize:'13px',fontWeight:600,color:'#111928'}},'Using ',R('span',{style:{fontFamily:MONO,color:'#0084FF'}},'notion_append_block_children')),
+                R('div',{style:{fontSize:'10px',color:'#9CA3AF'}},'Append a block to an existing Notion page.')
+              ),
+              R('div',{style:{marginLeft:'auto',fontSize:'10px',color:'#9CA3AF'}},'594 ms')
+            ),
+            R('div',{style:{padding:'8px 12px',background:'#F9FAFB',borderRadius:'8px',fontFamily:MONO,fontSize:'11px',color:'#111928',lineHeight:1.55,marginBottom:'6px'}},
+              R('div',{style:{color:'#6B7280',fontSize:'9px',marginBottom:'2px'}},'Input'),
+              R('div',null,'block_id: "7e22ad64-336e-…"'),
+              R('div',null,'children: [{ type:"to_do", checked:false,'),
+              R('div',null,'  rich_text:"Schedule a review meeting" }]')
+            ),
+            R('div',{style:{padding:'8px 12px',background:'#0F172A',borderRadius:'8px',fontFamily:MONO,fontSize:'10px',color:'#D1D5DB',lineHeight:1.65}},
+              R('div',{style:{color:'#94A3B8',fontSize:'9px',marginBottom:'2px'}},'Output'),
+              R('div',null,'{"object":"list","results":[{...}]}')
+            )
+          ),
+          R('div',{style:{opacity:r4In,padding:'10px 12px',background:'#F4F5F7',borderRadius:'10px',color:'#172B4D',fontSize:'11px',lineHeight:1.45}},
+            R('div',null,'Done — added the new follow-up to your page.')
+          )
+        )
+      )
+    )
+  );
+  // Notion side panel — appears with the shrink, morphs source → created
+  var slideIn=easeBack(cl(f/30));
+  var pageSettle=ease(cl((f-30)/30));
+  var contentMorph=easeInOut(cl((f-130)/30));
+  var skeletonOp=1-contentMorph;
+  var fullOp=contentMorph;
+  var nW=600, nH=900, nX=1320;
+  var nY=lerp(1080, 64, slideIn);
+  var editedBadge=r3In>0.5?'edited a second ago':'just now';
+  function checkOn(d){return ease(cl((f-(210+d))/16));}
+  var notionPanel=R('div',{style:{position:'absolute',left:nX+'px',top:nY+'px',width:nW+'px',height:nH+'px',background:'#FFFFFF',borderRadius:'12px',overflow:'hidden',boxShadow:'0 40px 80px rgba(17,25,40,0.30)',border:'1px solid #D1D5DB'}},
+    R('div',{style:{height:'36px',background:'#DEE1E6',display:'flex',alignItems:'flex-end',padding:'0 14px',position:'relative'}},
+      R('div',{style:{position:'absolute',left:14,top:12,width:10,height:10,borderRadius:'50%',background:'#FF5F57'}}),
+      R('div',{style:{position:'absolute',left:32,top:12,width:10,height:10,borderRadius:'50%',background:'#FEBC2E'}}),
+      R('div',{style:{position:'absolute',left:50,top:12,width:10,height:10,borderRadius:'50%',background:'#28C840'}}),
+      R('div',{style:{marginLeft:'82px',height:'28px',padding:'0 14px',background:'#F4F5F7',borderTopLeftRadius:'9px',borderTopRightRadius:'9px',display:'flex',alignItems:'center',gap:'8px',fontSize:'12px',color:'#172B4D',fontWeight:600}},
+        NotionMark(13,'#111928'),
+        R('span',null,(contentMorph<0.5?'Notion AI capability demo draft':'Capability Demo Summary')+' · Notion')
+      )
+    ),
+    R('div',{style:{height:'38px',background:'#F4F5F7',borderBottom:'1px solid #DFE1E6',display:'flex',alignItems:'center',padding:'0 16px',gap:'12px'}},
+      R('div',{style:{display:'flex',gap:'10px',color:'#9AA0A6',fontSize:'14px'}},R('span',null,'←'),R('span',null,'→'),R('span',null,'↻')),
+      R('div',{style:{flex:1,padding:'5px 14px',background:'#FFFFFF',border:'1px solid #DFE1E6',borderRadius:'14px',fontSize:'12px',color:'#42526E',display:'flex',alignItems:'center',gap:'10px'}},
+        R('div',{style:{width:7,height:7,borderRadius:'50%',background:'#22C55E'}}),
+        R('span',{style:{color:'#172B4D'}},'notion.so'),
+        R('span',{style:{color:'#6B7280'}},contentMorph<0.5?'/Notion-AI-capability-demo-draft-36d0ad64336e80c18627e0c275f0da3b':'/Capability-Demo-Summary-7e22ad64336e80b1a4f4c1e0b89df073')
+      )
+    ),
+    R('div',{style:{padding:'36px 48px 28px 48px',position:'relative',transform:'translateY('+(16*(1-pageSettle))+'px)',opacity:pageSettle,minHeight:'480px'}},
+      R('div',{style:{position:'absolute',top:'14px',right:'20px',padding:'4px 10px',background:'#DCFCE7',color:'#15803D',fontSize:'10px',fontWeight:700,borderRadius:'12px',border:'1px solid #86EFAC',display:'flex',alignItems:'center',gap:'5px',opacity:fullOp}},
+        R('span',null,'✓'),'Created via Notion MCP'
+      ),
+      R('div',{style:{position:'absolute',left:'48px',right:'48px',top:'36px',opacity:skeletonOp}},
+        R('div',{style:{fontSize:'30px',fontWeight:800,color:'#111928',letterSpacing:'-0.8px',marginBottom:'20px'}},'Notion AI capability demo draft'),
+        R('div',{style:{fontSize:'17px',fontWeight:700,color:'#111928',marginTop:'14px'}},'Quick actions'),
+        R('div',{style:{fontSize:'13px',color:'#374151',marginTop:'4px'}},'• Add your assignment list as a checklist with due dates'),
+        R('div',{style:{fontSize:'17px',fontWeight:700,color:'#111928',marginTop:'14px'}},'Mini slide deck'),
+        R('div',{style:{fontSize:'13px',color:'#374151',marginTop:'4px'}},'Use Present to view as slides.'),
+        R('div',{style:{fontSize:'17px',fontWeight:700,color:'#111928',marginTop:'14px'}},'Slide 1: Goal'),
+        R('div',{style:{fontSize:'13px',color:'#374151',marginTop:'4px'}},'Show structure: headings, lists, callouts, tables'),
+        R('div',{style:{fontSize:'17px',fontWeight:700,color:'#111928',marginTop:'14px'}},'Slide 2: Output types'),
+        R('div',{style:{fontSize:'13px',color:'#374151',marginTop:'4px'}},'Summaries and outlines')
+      ),
+      R('div',{style:{position:'absolute',left:'48px',right:'48px',top:'36px',opacity:fullOp}},
+        R('div',{style:{fontSize:'30px',fontWeight:800,color:'#111928',letterSpacing:'-0.8px',marginBottom:'6px'}},'Capability Demo Summary'),
+        R('div',{style:{fontSize:'12px',color:'#9CA3AF',marginBottom:'20px',display:'flex',alignItems:'center',gap:'8px'}},
+          R('span',null,'Created by Using Notion Tool'),
+          R('span',{style:{color:'#D1D5DB'}},'·'),
+          R('span',{style:{color:r3In>0.5?'#15803D':'#9CA3AF',fontWeight:r3In>0.5?600:400}},editedBadge)
+        ),
+        R('div',{style:{padding:'12px 16px',background:'#EEF4FF',border:'1px solid #DBE7FF',borderRadius:'10px',color:'#1A56DB',fontSize:'13px',marginBottom:'20px',display:'flex',alignItems:'center',gap:'10px'}},
+          R('div',{style:{width:'20px',height:'20px',borderRadius:'5px',background:'#FFFFFF',border:'1px solid #DBE7FF',display:'flex',alignItems:'center',justifyContent:'center'}},NotionMark(12,'#111928')),
+          R('div',null,R('span',{style:{fontWeight:700}},'Source: '),'Notion AI capability demo draft')
+        ),
+        R('div',{style:{fontSize:'18px',fontWeight:700,color:'#111928',marginBottom:'8px'}},'Summary'),
+        R('div',{style:{fontSize:'13px',color:'#374151',lineHeight:1.65,marginBottom:'18px'}},
+          R('div',null,'•  Quick actions for ad-hoc checklists and rewrites.'),
+          R('div',null,'•  A mini slide deck used in Presentation Mode.'),
+          R('div',null,'•  Two example slides covering goal and output types.')
+        ),
+        R('div',{style:{fontSize:'18px',fontWeight:700,color:'#111928',marginBottom:'8px'}},'Follow-ups'),
+        R('div',{style:{fontSize:'13px',color:'#374151',lineHeight:1.85}},
+          R('div',{style:{display:'flex',alignItems:'center',gap:'10px'}},
+            R('div',{style:{width:'14px',height:'14px',borderRadius:'3px',border:'1.5px solid #9CA3AF',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'9px',color:'#FFFFFF',background:checkOn(0)>0.5?'#22C55E':'transparent',borderColor:checkOn(0)>0.5?'#22C55E':'#9CA3AF'}},checkOn(0)>0.5?'✓':''),
+            R('span',null,'Pick a real "Quick actions" task to walk through with the agent.')
+          ),
+          R('div',{style:{display:'flex',alignItems:'center',gap:'10px'}},
+            R('div',{style:{width:'14px',height:'14px',borderRadius:'3px',border:'1.5px solid #9CA3AF'}}),
+            R('span',null,'Record the slide deck as a thirty-second screen capture.')
+          ),
+          R('div',{style:{display:'flex',alignItems:'center',gap:'10px'}},
+            R('div',{style:{width:'14px',height:'14px',borderRadius:'3px',border:'1.5px solid #9CA3AF'}}),
+            R('span',null,'Link this summary back from the source page.')
+          ),
+          R('div',{style:{display:'flex',alignItems:'center',gap:'10px',opacity:r4In}},
+            R('div',{style:{width:'14px',height:'14px',borderRadius:'3px',border:'1.5px solid #0084FF',background:r4In>0.5?'#EEF4FF':'transparent'}}),
+            R('span',{style:{color:r4In>0.5?'#0084FF':'#9CA3AF',fontWeight:r4In>0.5?600:400}},'Schedule a review meeting.')
+          )
+        )
+      )
+    )
+  );
+  return R('div',{style:{width:'100%',height:'100%',background:'#EEF1F4',position:'relative',fontFamily:INTER,opacity:op,overflow:'hidden'}},
+    SectionLabel('Scene 8 · Chat (turns 3–4) + Notion morph'),
+    FHChrome({
+      gradId:'c2',
+      tabText:'Using Notion Tool · FlowHunt',
+      urlPath:'/agents/using-notion-tool/run',
+      activeNav:'My Agents',
+      rightBtnText:'Publish Agent',
+      showEditRun:true,
+      runActive:true,
+      eyebrow:'AGENT, RUNNING',
+      title:'Run the agent, ask anything, and watch it call Notion live — no terminal required.',
+      browserW:browserW,
+      browserAnchorLeft:true,
+      body:body
+    }),
+    notionPanel
+  );
+}`;
+
+/* ============================================================================
+ * SCENE 9 — FH Result (final reveal — full-screen Notion page, no FH chrome)
+ * ========================================================================== */
+const FHResultScene = `function FHResultScene(props){${HELPERS}
+  var f=props.frame||0;
+  var END=120;
+  var sceneOut=easeIn(cl((f-(END-22))/22));
+  var op=1-sceneOut;
+  var inP=ease(cl(f/22));
+  // Single large Notion-style browser window centred on the canvas.
+  var bw=1360, bh=920;
+  var bx=(1920-bw)/2;
+  var by=(1080-bh)/2;
+  return R('div',{style:{width:'100%',height:'100%',background:'#EEF1F4',position:'relative',fontFamily:INTER,opacity:op,overflow:'hidden'}},
+    SectionLabel('Scene 9 · Result'),
+    // Eyebrow + title up top
+    R('div',{style:{position:'absolute',top:'24px',left:0,right:0,textAlign:'center',opacity:inP}},
+      R('div',{style:{fontSize:'13px',fontWeight:700,color:'#6B7280',letterSpacing:'2.6px',marginBottom:'6px'}},'DONE'),
+      R('div',{style:{fontSize:'24px',fontWeight:800,color:'#111928',letterSpacing:'-0.3px'}},'Your new Notion page — created by an AI agent in three prompts.')
+    ),
+    R('div',{style:{position:'absolute',left:bx+'px',top:(by+30)+'px',width:bw+'px',height:bh+'px',background:'#FFFFFF',borderRadius:'14px',overflow:'hidden',boxShadow:'0 40px 80px rgba(17,25,40,0.30)',border:'1px solid #D1D5DB',opacity:inP,transform:'translateY('+(16*(1-inP))+'px)'}},
+      R('div',{style:{height:'40px',background:'#DEE1E6',display:'flex',alignItems:'flex-end',padding:'0 14px',position:'relative'}},
+        R('div',{style:{position:'absolute',left:14,top:14,width:12,height:12,borderRadius:'50%',background:'#FF5F57'}}),
+        R('div',{style:{position:'absolute',left:34,top:14,width:12,height:12,borderRadius:'50%',background:'#FEBC2E'}}),
+        R('div',{style:{position:'absolute',left:54,top:14,width:12,height:12,borderRadius:'50%',background:'#28C840'}}),
+        R('div',{style:{marginLeft:'90px',height:'30px',padding:'0 16px',background:'#F4F5F7',borderTopLeftRadius:'9px',borderTopRightRadius:'9px',display:'flex',alignItems:'center',gap:'8px',fontSize:'13px',color:'#172B4D',fontWeight:600}},
+          NotionMark(14,'#111928'),
+          R('span',null,'Capability Demo Summary · Notion')
+        )
+      ),
+      R('div',{style:{height:'42px',background:'#F4F5F7',borderBottom:'1px solid #DFE1E6',display:'flex',alignItems:'center',padding:'0 18px',gap:'14px'}},
+        R('div',{style:{display:'flex',gap:'12px',color:'#9AA0A6',fontSize:'15px'}},R('span',null,'←'),R('span',null,'→'),R('span',null,'↻')),
+        R('div',{style:{flex:1,padding:'6px 14px',background:'#FFFFFF',border:'1px solid #DFE1E6',borderRadius:'16px',fontSize:'13px',color:'#42526E',display:'flex',alignItems:'center',gap:'10px'}},
+          R('div',{style:{width:7,height:7,borderRadius:'50%',background:'#22C55E'}}),
+          R('span',{style:{color:'#172B4D'}},'notion.so'),
+          R('span',{style:{color:'#6B7280'}},'/Capability-Demo-Summary-7e22ad64336e80b1a4f4c1e0b89df073')
+        )
+      ),
+      R('div',{style:{padding:'56px 100px 40px 100px',position:'relative'}},
+        R('div',{style:{position:'absolute',top:'22px',right:'30px',padding:'5px 14px',background:'#DCFCE7',color:'#15803D',fontSize:'13px',fontWeight:700,borderRadius:'14px',border:'1px solid #86EFAC',display:'flex',alignItems:'center',gap:'7px'}},
+          R('span',null,'✓'),'Created via Notion MCP'
+        ),
+        R('div',{style:{fontSize:'44px',fontWeight:800,color:'#111928',letterSpacing:'-1px',marginBottom:'8px'}},'Capability Demo Summary'),
+        R('div',{style:{fontSize:'14px',color:'#9CA3AF',marginBottom:'28px',display:'flex',alignItems:'center',gap:'8px'}},
+          R('span',null,'Created by Using Notion Tool'),
+          R('span',{style:{color:'#D1D5DB'}},'·'),
+          R('span',{style:{color:'#15803D',fontWeight:600}},'edited a second ago')
+        ),
+        R('div',{style:{padding:'16px 22px',background:'#EEF4FF',border:'1px solid #DBE7FF',borderRadius:'12px',color:'#1A56DB',fontSize:'15px',marginBottom:'28px',display:'flex',alignItems:'center',gap:'12px'}},
+          R('div',{style:{width:'24px',height:'24px',borderRadius:'6px',background:'#FFFFFF',border:'1px solid #DBE7FF',display:'flex',alignItems:'center',justifyContent:'center'}},NotionMark(15,'#111928')),
+          R('div',null,R('span',{style:{fontWeight:700}},'Source: '),'Notion AI capability demo draft')
+        ),
+        R('div',{style:{fontSize:'22px',fontWeight:700,color:'#111928',marginBottom:'10px'}},'Summary'),
+        R('div',{style:{fontSize:'15px',color:'#374151',lineHeight:1.75,marginBottom:'26px'}},
+          R('div',null,'•  Quick actions for ad-hoc checklists and rewrites.'),
+          R('div',null,'•  A mini slide deck used in Presentation Mode.'),
+          R('div',null,'•  Two example slides covering goal and output types.')
+        ),
+        R('div',{style:{fontSize:'22px',fontWeight:700,color:'#111928',marginBottom:'10px'}},'Follow-ups'),
+        R('div',{style:{fontSize:'15px',color:'#374151',lineHeight:2.1}},
+          R('div',{style:{display:'flex',alignItems:'center',gap:'12px'}},
+            R('div',{style:{width:'17px',height:'17px',borderRadius:'4px',border:'1.5px solid #22C55E',background:'#22C55E',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11px',color:'#FFFFFF'}},'✓'),
+            R('span',null,'Pick a real "Quick actions" task to walk through with the agent.')
+          ),
+          R('div',{style:{display:'flex',alignItems:'center',gap:'12px'}},
+            R('div',{style:{width:'17px',height:'17px',borderRadius:'4px',border:'1.5px solid #9CA3AF'}}),
+            R('span',null,'Record the slide deck as a thirty-second screen capture.')
+          ),
+          R('div',{style:{display:'flex',alignItems:'center',gap:'12px'}},
+            R('div',{style:{width:'17px',height:'17px',borderRadius:'4px',border:'1.5px solid #9CA3AF'}}),
+            R('span',null,'Link this summary back from the source page.')
+          ),
+          R('div',{style:{display:'flex',alignItems:'center',gap:'12px'}},
+            R('div',{style:{width:'17px',height:'17px',borderRadius:'4px',border:'1.5px solid #0084FF',background:'#EEF4FF'}}),
+            R('span',{style:{color:'#0084FF',fontWeight:600}},'Schedule a review meeting.')
+          )
+        )
+      )
+    )
+  );
+}`;
+
+/* ============================================================================
+ * SCENE 10 — CTA (FlowHunt mark + wordmark at the BOTTOM)
  * ========================================================================== */
 const CTAScene = `function CTAScene(props){${HELPERS}
   var f=props.frame||0;
@@ -925,7 +1046,7 @@ const CTAScene = `function CTAScene(props){${HELPERS}
   var op=1-sceneOut;
   var btnNudge=Math.sin(f/12)*3;
   return R('div',{style:{width:'100%',height:'100%',background:'#FFFFFF',position:'relative',fontFamily:INTER,opacity:op,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',paddingTop:'80px'}},
-    SectionLabel('Scene 6 · CTA'),
+    SectionLabel('Scene 10 · CTA'),
     // Top: eyebrow + tight title + subtitle + button + URL
     R('div',{style:{fontSize:'13px',fontWeight:700,color:'#6B7280',letterSpacing:'3px',marginBottom:'18px',opacity:eyebrowIn}},'ONE SETUP · TWO SURFACES'),
     R('div',{style:{fontSize:'72px',fontWeight:800,color:'#111928',letterSpacing:'-1.8px',textAlign:'center',lineHeight:1.08,maxWidth:'1700px',opacity:titleIn,transform:'translateY('+(10*(1-titleIn))+'px)',whiteSpace:'nowrap'}},
@@ -1008,23 +1129,31 @@ const template = {
     backgroundColor: '#FFFFFF',
   },
   customComponents: {
-    Watermark:      { type: 'inline', code: Watermark },
-    PivotScene:     { type: 'inline', code: PivotScene },
-    InstallScene:   { type: 'inline', code: InstallScene },
-    ArchScene:      { type: 'inline', code: ArchScene },
-    DemoScene:      { type: 'inline', code: DemoScene },
-    FlowHuntScene:  { type: 'inline', code: FlowHuntScene },
-    CTAScene:       { type: 'inline', code: CTAScene },
+    Watermark:           { type: 'inline', code: Watermark },
+    PivotScene:          { type: 'inline', code: PivotScene },
+    InstallScene:        { type: 'inline', code: InstallScene },
+    ArchScene:           { type: 'inline', code: ArchScene },
+    DemoScene:           { type: 'inline', code: DemoScene },
+    FHMarketplaceScene:  { type: 'inline', code: FHMarketplaceScene },
+    FHToolCatalogScene:  { type: 'inline', code: FHToolCatalogScene },
+    FHChat1Scene:        { type: 'inline', code: FHChat1Scene },
+    FHChat2Scene:        { type: 'inline', code: FHChat2Scene },
+    FHResultScene:       { type: 'inline', code: FHResultScene },
+    CTAScene:            { type: 'inline', code: CTAScene },
   },
   inputs: [],
   composition: {
     scenes: [
-      scene('s1-pivot',    F.pivot,    'PivotScene'),
-      scene('s2-install',  F.install,  'InstallScene'),
-      scene('s3-arch',     F.arch,     'ArchScene'),
-      scene('s4-demo',     F.demo,     'DemoScene'),
-      scene('s5-flowhunt', F.flowhunt, 'FlowHuntScene'),
-      scene('s6-cta',      F.cta,      'CTAScene', { suppressWatermark: true, transition: { type: 'fade', duration: 26 } }),
+      scene('s1-pivot',           F.pivot,     'PivotScene'),
+      scene('s2-install',         F.install,   'InstallScene'),
+      scene('s3-arch',            F.arch,      'ArchScene'),
+      scene('s4-demo',            F.demo,      'DemoScene'),
+      scene('s5a-fh-marketplace', F.fhMarket,  'FHMarketplaceScene'),
+      scene('s5b-fh-toolcatalog', F.fhCatalog, 'FHToolCatalogScene'),
+      scene('s5c1-fh-chat1',      F.fhChat1,   'FHChat1Scene'),
+      scene('s5c2-fh-chat2',      F.fhChat2,   'FHChat2Scene'),
+      scene('s5d-fh-result',      F.fhResult,  'FHResultScene'),
+      scene('s6-cta',             F.cta,       'CTAScene', { suppressWatermark: true, transition: { type: 'fade', duration: 26 } }),
     ],
   },
 };
