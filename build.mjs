@@ -753,18 +753,26 @@ const FHChat2Scene = `function FHChat2Scene(props){${HELPERS}${FH_CHROME_HELPERS
   // FH browser shrinks over the first 30 frames (the layout transition)
   var dPhase=ease(cl(f/30));
   var browserW=lerp(1760,1240,dPhase);
-  // Turns 1 + 2 from Scene 7 ARE STILL VISIBLE at the top — they were always there, so they
-  // render at full opacity from f=0. The viewer perceives the chat as continuous.
-  // Turn 3 lands at scene-local f=0 (the canvas-squish from Scene 7 ended right at the cut).
-  var u3In=ease(cl((f-0)/14));
-  var load3=cl(ease(cl((f-30)/12))-easeIn(cl((f-50)/10)));
-  var t3In=ease(cl((f-50)/18));
-  var r3In=ease(cl((f-95)/16));
-  // Turn 4 timings — slightly later to give Turn 3 reading time
-  var u4In=ease(cl((f-150)/14));
-  var load4=cl(ease(cl((f-180)/12))-easeIn(cl((f-200)/10)));
-  var t4In=ease(cl((f-200)/18));
-  var r4In=ease(cl((f-245)/16));
+  // Turns 1 + 2 carry over from Scene 7 at full size — chat starts EXACTLY where Scene 7
+  // ended. New turns fade in one-by-one, with smooth auto-scroll so the newest content
+  // stays in view while older content drifts up off-screen (real chat-app behaviour).
+  var u3In=ease(cl((f-15)/22));    // Turn 3 prompt
+  var load3=cl(ease(cl((f-50)/12))-easeIn(cl((f-78)/10)));
+  var t3In=ease(cl((f-78)/22));     // tool widget
+  var r3In=ease(cl((f-130)/22));    // reply
+  var u4In=ease(cl((f-180)/22));    // Turn 4 prompt
+  var load4=cl(ease(cl((f-215)/12))-easeIn(cl((f-243)/10)));
+  var t4In=ease(cl((f-243)/22));    // tool widget
+  var r4In=ease(cl((f-285)/22));    // reply
+  // Auto-scroll: cumulative translateY upward as each new chunk lands. Sized to roughly
+  // match each chunk's visible height so the newest item settles at the bottom of view.
+  var sT3p = ease(cl((f-25)/30)) * 80;
+  var sT3w = ease(cl((f-88)/30)) * 190;
+  var sT3r = ease(cl((f-140)/30)) * 100;
+  var sT4p = ease(cl((f-190)/30)) * 90;
+  var sT4w = ease(cl((f-253)/30)) * 180;
+  var sT4r = ease(cl((f-295)/30)) * 80;
+  var chatScrollY = sT3p + sT3w + sT3r + sT4p + sT4w + sT4r;
   function AILoadingBanner(toolName, opacity, key){
     if(opacity<0.05) return null;
     var pulse=Math.sin(f*0.32)*0.5+0.5;
@@ -782,10 +790,10 @@ const FHChat2Scene = `function FHChat2Scene(props){${HELPERS}${FH_CHROME_HELPERS
         R('div',{style:{marginLeft:'auto',display:'flex',alignItems:'center',gap:'5px',fontSize:'11px',color:'#22C55E',fontWeight:700}},R('span',{style:{display:'inline-block',width:'7px',height:'7px',borderRadius:'50%',background:'#22C55E'}}),'Live')
       ),
       R('div',{style:{flex:1,position:'relative',overflow:'hidden'}},
-        // Inner stack pinned to the BOTTOM so the newest turn is always visible.
-        // The carried-over Turn 1+2 use the SAME size + style as Scene 7 (and include the
-        // notion_search tool widget) so the chat reads as one continuous thread.
-        R('div',{style:{position:'absolute',left:0,right:0,bottom:0,top:0,padding:'18px 22px',display:'flex',flexDirection:'column',justifyContent:'flex-end',gap:'0'}},
+        // Inner stack pinned to the TOP and translated upward as new content arrives.
+        // Starts EXACTLY where Scene 7 ended (Turn 1 + Turn 2 + tool widget all in place),
+        // then smoothly auto-scrolls so each new turn lands at the bottom of view.
+        R('div',{style:{position:'absolute',left:0,right:0,top:0,padding:'18px 22px',transform:'translateY('+(-chatScrollY)+'px)'}},
           // Turn 1 — capabilities Q + A
           R('div',{style:{display:'flex',justifyContent:'flex-end',marginBottom:'10px'}},
             R('div',{style:{padding:'10px 16px',borderRadius:'18px 18px 4px 18px',background:'#0084FF',color:'#FFFFFF',fontSize:'13px',maxWidth:'78%'}},'Explain what you can do with all your Notion tools.')
