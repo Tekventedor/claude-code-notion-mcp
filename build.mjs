@@ -782,24 +782,51 @@ const FHChat2Scene = `function FHChat2Scene(props){${HELPERS}${FH_CHROME_HELPERS
         R('div',{style:{marginLeft:'auto',display:'flex',alignItems:'center',gap:'5px',fontSize:'11px',color:'#22C55E',fontWeight:700}},R('span',{style:{display:'inline-block',width:'7px',height:'7px',borderRadius:'50%',background:'#22C55E'}}),'Live')
       ),
       R('div',{style:{flex:1,position:'relative',overflow:'hidden'}},
-        R('div',{style:{position:'absolute',left:0,right:0,top:0,padding:'14px 22px'}},
-          // ── Carried over from Scene 7: Turn 1 + Turn 2 are already visible at the top.
-          // Rendered at a tighter scale so all four turns fit without scrolling.
-          R('div',{style:{display:'flex',justifyContent:'flex-end',marginBottom:'8px'}},
-            R('div',{style:{padding:'7px 12px',borderRadius:'14px 14px 4px 14px',background:'#0084FF',color:'#FFFFFF',fontSize:'11px',maxWidth:'78%'}},'Explain what you can do with all your Notion tools.')
+        // Inner stack pinned to the BOTTOM so the newest turn is always visible.
+        // The carried-over Turn 1+2 use the SAME size + style as Scene 7 (and include the
+        // notion_search tool widget) so the chat reads as one continuous thread.
+        R('div',{style:{position:'absolute',left:0,right:0,bottom:0,top:0,padding:'18px 22px',display:'flex',flexDirection:'column',justifyContent:'flex-end',gap:'0'}},
+          // Turn 1 — capabilities Q + A
+          R('div',{style:{display:'flex',justifyContent:'flex-end',marginBottom:'10px'}},
+            R('div',{style:{padding:'10px 16px',borderRadius:'18px 18px 4px 18px',background:'#0084FF',color:'#FFFFFF',fontSize:'13px',maxWidth:'78%'}},'Explain what you can do with all your Notion tools.')
           ),
-          R('div',{style:{padding:'8px 10px',background:'#F4F5F7',borderRadius:'10px',color:'#172B4D',fontSize:'10px',lineHeight:1.4,marginBottom:'8px'}},
-            R('div',{style:{fontWeight:700,marginBottom:'2px'}},'Here\\'s what I can do for you in Notion:'),
-            R('div',null,R('span',{style:{fontWeight:700,color:'#111928'}},'1) Find things'),' — semantic search (notion_search).'),
-            R('div',null,R('span',{style:{fontWeight:700,color:'#111928'}},'2) Read content'),' — page bodies, blocks, properties.'),
-            R('div',null,R('span',{style:{fontWeight:700,color:'#111928'}},'3) Query databases'),' / ',R('span',{style:{fontWeight:700,color:'#111928'}},'4) Create new content'),' / ',R('span',{style:{fontWeight:700,color:'#111928'}},'5) Edit & organise'),'.')
+          R('div',{style:{padding:'12px 14px',background:'#F4F5F7',borderRadius:'12px',color:'#172B4D',fontSize:'12px',lineHeight:1.55,marginBottom:'16px'}},
+            R('div',{style:{fontWeight:700,fontSize:'13px',marginBottom:'6px'}},'Here\\'s what I can do for you in Notion:'),
+            R('div',{style:{marginTop:'4px'}},R('span',{style:{fontWeight:700,color:'#111928'}},'1) Find things'),' — semantic search (',R('span',{style:{fontFamily:MONO,color:'#0084FF'}},'notion_search'),').'),
+            R('div',{style:{marginTop:'4px'}},R('span',{style:{fontWeight:700,color:'#111928'}},'2) Read content'),' — fetch page bodies, blocks, properties, comments.'),
+            R('div',{style:{marginTop:'4px'}},R('span',{style:{fontWeight:700,color:'#111928'}},'3) Query databases'),' — filter and sort with structured queries.'),
+            R('div',{style:{marginTop:'4px'}},R('span',{style:{fontWeight:700,color:'#111928'}},'4) Create new content'),' — new pages, databases, comments, block children.'),
+            R('div',{style:{marginTop:'4px'}},R('span',{style:{fontWeight:700,color:'#111928'}},'5) Edit & organise'),' — update, move, archive existing pages and blocks.')
           ),
-          R('div',{style:{display:'flex',justifyContent:'flex-end',marginBottom:'8px'}},
-            R('div',{style:{padding:'7px 12px',borderRadius:'14px 14px 4px 14px',background:'#0084FF',color:'#FFFFFF',fontSize:'11px',maxWidth:'78%'}},'Can you find a page called "Notion AI capability demo draft"?')
+          // Turn 2 — find page Q + tool widget + reply (matches Scene 7 exactly)
+          R('div',{style:{display:'flex',justifyContent:'flex-end',marginBottom:'10px'}},
+            R('div',{style:{padding:'10px 16px',borderRadius:'18px 18px 4px 18px',background:'#0084FF',color:'#FFFFFF',fontSize:'13px',maxWidth:'78%'}},'Can you find a page called "Notion AI capability demo draft"?')
           ),
-          R('div',{style:{padding:'8px 10px',background:'#F4F5F7',borderRadius:'10px',color:'#172B4D',fontSize:'10px',lineHeight:1.4,marginBottom:'12px'}},
+          R('div',{style:{fontSize:'10px',color:'#6B7280',marginBottom:'6px'}},'From: AIAgent'),
+          R('div',{style:{padding:'14px 16px',borderRadius:'12px',border:'1px solid #E5E7EB',background:'#FFFFFF',marginBottom:'12px'}},
+            R('div',{style:{display:'flex',alignItems:'center',gap:'10px',marginBottom:'12px'}},
+              R('span',{style:{fontSize:'14px'}},'⚙'),
+              R('div',null,
+                R('div',{style:{fontSize:'13px',fontWeight:600,color:'#111928'}},'Using ',R('span',{style:{fontFamily:MONO,color:'#0084FF'}},'notion_search')),
+                R('div',{style:{fontSize:'10px',color:'#9CA3AF'}},'Search for pages and databases by title in Notion.')
+              ),
+              R('div',{style:{marginLeft:'auto',fontSize:'10px',color:'#9CA3AF'}},'1103 ms')
+            ),
+            R('div',{style:{padding:'8px 12px',background:'#F9FAFB',borderRadius:'8px',fontFamily:MONO,fontSize:'11px',color:'#111928',lineHeight:1.55,marginBottom:'6px'}},
+              R('div',{style:{color:'#6B7280',fontSize:'9px',marginBottom:'2px'}},'Input'),
+              R('div',null,'query: "Notion AI capability demo draft"'),
+              R('div',null,'filter_type: page')
+            ),
+            R('div',{style:{padding:'8px 12px',background:'#0F172A',borderRadius:'8px',fontFamily:MONO,fontSize:'10px',color:'#D1D5DB',lineHeight:1.65}},
+              R('div',{style:{color:'#94A3B8',fontSize:'9px',marginBottom:'2px'}},'Output'),
+              R('div',null,'[{"object":"page","id":"36d0ad64-336e-80c1-…",'),
+              R('div',null,'  "title":"Notion AI capability demo draft",'),
+              R('div',null,'  "url":"notion.so/Notion-AI-capability-…"}]')
+            )
+          ),
+          R('div',{style:{padding:'12px 14px',background:'#F4F5F7',borderRadius:'12px',color:'#172B4D',fontSize:'12px',lineHeight:1.55,marginBottom:'18px'}},
             R('div',null,'Yes — I can see it.'),
-            R('div',null,R('span',{style:{fontWeight:700,color:'#111928'}},'Page:'),' Notion AI capability demo draft'),
+            R('div',{style:{marginTop:'4px'}},R('span',{style:{fontWeight:700,color:'#111928'}},'Page:'),' Notion AI capability demo draft'),
             R('div',null,R('span',{style:{fontWeight:700,color:'#111928'}},'Last edited:'),' 2026-05-27 18:41')
           ),
           // Turn 3 — lands at scene-local f=0, right after the canvas-squish cut from Scene 7
